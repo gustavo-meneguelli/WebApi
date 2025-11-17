@@ -14,4 +14,11 @@ public class ProductService(IProductRepository repository) : IProductService
     {
         return repository.GetProduct(id);
     }
+
+    public Product AddProduct(string productName, decimal price)
+    {
+        var product = new Product {  Name = productName, Price = price };
+        repository.AddProduct(product);
+        return product;
+    }
 }

@@ -23,4 +23,10 @@ public class ProductRepository : IProductRepository
     {
         return _temporaryList.FirstOrDefault(p => p.Id == id);
     }
+
+    public Product AddProduct(Product product)
+    {
+        _temporaryList.ToList().Add(product);
+        return product;
+    }
 }

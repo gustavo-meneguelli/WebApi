@@ -26,4 +26,12 @@ public class ProductsController(IProductService service) : ControllerBase
         
         return Ok(serviceResult);
     }
+
+    [HttpPost]
+    public IActionResult AddProduct(string productName, int productPrice)
+    {
+        var  serviceResult = service.AddProduct(productName, productPrice);
+        
+        return CreatedAtAction(nameof(GetProductById), new { id = serviceResult.Id }, serviceResult);
+    }
 }
