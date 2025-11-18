@@ -1,12 +1,13 @@
 using Application.DTO;
+using Application.Utilities;
 using Domain.Models;
 
 namespace Application.Interfaces;
 
 public interface IProductService
 {
-    IEnumerable<Product> GetAll();
-    Product? GetById(int id);
-    Product AddProduct(CreateProductDto dto);
-    Product? UpdateProduct(int id, UpdateProductDto dto);
+    Result<IEnumerable<Product>> GetAll();
+    Result<Product?> GetById(int id);
+    Result<Product> AddProduct(CreateProductDto dto);
+    Result<Product?> UpdateProduct(int id, UpdateProductDto dto);
 }

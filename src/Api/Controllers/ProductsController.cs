@@ -1,4 +1,5 @@
 using Application.DTO;
+using Application.Enums;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,8 @@ public class ProductsController(IProductService service) : ControllerBase
     public IActionResult GetAllProducts()
     {
         var serviceResult = service.GetAll();
-        return Ok(serviceResult);
+        
+        return Ok(serviceResult.Data);
     }
 
     [HttpGet("{id}")]
@@ -20,20 +22,28 @@ public class ProductsController(IProductService service) : ControllerBase
     {
         var serviceResult = service.GetById(id);
 
-        if (serviceResult is null)
+        if (serviceResult.TypeResult is TypeResult.NotFound)
         {
-            return NotFound();
+            return NotFound(serviceResult.Message);
         }
         
-        return Ok(serviceResult);
+        return Ok(serviceResult.Data);
     }
 
     [HttpPost]
     public IActionResult AddProduct(CreateProductDto dto)
     {
-        var  serviceResult = service.AddProduct(dto);
-        
-        return CreatedAtAction(nameof(GetProductById), new { id = serviceResult.Id }, serviceResult);
+        var serviceResult = service.AddProduct(dto);
+
+        switch (serviceResult.TypeResult)
+        {
+            case TypeResult.Created when serviceResult.Data != null:
+                return CreatedAtAction(nameof(GetProductById), new { id = serviceResult.Data.Id }, serviceResult.Data);
+            case TypeResult.Duplicated:
+                return Conflict(serviceResult.Message);
+            default:
+                return Problem("Something went wrong.");
+        }
     }
 
     [HttpPatch("{id}")]
@@ -41,11 +51,11 @@ public class ProductsController(IProductService service) : ControllerBase
     {
         var serviceResult = service.UpdateProduct(id, dto);
 
-        if (serviceResult is null)
+        if (serviceResult.TypeResult is TypeResult.Duplicated)
         {
-            return NotFound();
+            return Conflict(serviceResult.Message);
         }
         
-        return Ok(serviceResult);
+        return Ok(serviceResult.Data);
     }
 }

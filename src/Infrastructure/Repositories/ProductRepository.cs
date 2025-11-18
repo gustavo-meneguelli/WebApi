@@ -17,6 +17,11 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         return context.Products.FirstOrDefault(p => p.Id == id);
     }
 
+    public Product? GetProductByName(string name)
+    {
+        return context.Products.FirstOrDefault(p => p.Name == name);
+    }
+
     public Product AddProduct(Product product)
     {
         context.Products.Add(product);
