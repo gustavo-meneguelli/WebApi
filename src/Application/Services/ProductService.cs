@@ -45,20 +45,24 @@ public class ProductService(IProductRepository repository) : IProductService
         {
             return Result<Product?>.NotFound("No products were found with this ID.");
         }
-
-        bool productExists = await repository.ExistByNameAsync(dto.Name);
-
-        if (productExists && dto.Name != product.Name) 
-        {
-            return Result<Product?>.Duplicate("Product with that name already exists.");
-        }
         
-        if (dto.Name != product.Name && dto.Name != string.Empty)
+        bool isNecessaryChangeName = dto.Name != string.Empty && dto.Name != product.Name;
+
+        if (isNecessaryChangeName)
         {
+            bool nameExists = await repository.ExistByNameAsync(dto.Name);
+
+            if (nameExists)
+            {
+                return Result<Product?>.Duplicate("Product with that name already exists.");
+            }
+
             product.Name = dto.Name;
         }
         
-        if (dto.Price != product.Price && dto.Price != 0)
+        bool isNecessaryChangePrice = dto.Price != product.Price && dto.Price != 0;
+
+        if (isNecessaryChangePrice)
         {
             product.Price = dto.Price;
         }
