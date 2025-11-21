@@ -1,11 +1,12 @@
 using Application.DTO;
 using Application.Interfaces;
 using Application.Utilities;
+using AutoMapper;
 using Domain.Models;
 
 namespace Application.Services;
 
-public class ProductService(IProductRepository repository) : IProductService
+public class ProductService(IProductRepository repository, IMapper mapper) : IProductService
 {
     public async Task<Result<IEnumerable<Product>>> GetAllAsync()
     {
@@ -32,7 +33,7 @@ public class ProductService(IProductRepository repository) : IProductService
             return Result<Product>.Duplicate("Product with that name already exists.");
         }
         
-        var product = new Product { Name = dto.Name, Price = dto.Price };
+        var product = mapper.Map<Product>(dto);
         await repository.AddAsync(product);
         return Result<Product>.Created(product);
     }
@@ -56,17 +57,10 @@ public class ProductService(IProductRepository repository) : IProductService
             {
                 return Result<Product?>.Duplicate("Product with that name already exists.");
             }
-
-            product.Name = dto.Name;
         }
+
+        mapper.Map(dto, product);
         
-        bool isNecessaryChangePrice = dto.Price != product.Price && dto.Price != 0;
-
-        if (isNecessaryChangePrice)
-        {
-            product.Price = dto.Price;
-        }
-
         await repository.UpdateAsync(product);
         return Result<Product?>.Success(product);
     }
