@@ -29,6 +29,8 @@ builder.Services.AddScoped<AppDbContext>();
 
 var app = builder.Build();
 
+app.UseMiddleware<Api.Middlewares.GlobalErrorHandlerMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
