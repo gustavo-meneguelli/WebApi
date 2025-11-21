@@ -31,11 +31,9 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         return product;
     }
 
-    public async Task<Product> UpdateAsync(Product product)
+    public async Task UpdateAsync(Product product)
     {
-        context.Products.Update(product);
         await context.SaveChangesAsync();
-        return product;
     }
 
     public async Task<bool> ExistByNameAsync(string name)
