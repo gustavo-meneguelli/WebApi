@@ -21,5 +21,8 @@ public class Result<T>
     public static Result<T> Duplicate(string message = "The operation was duplicated.") => new Result<T>()
         { Message = message, TypeResult = TypeResult.Duplicated };
 
+    public static Result<T> Unauthorized(string message = "The operation was unauthorized.") => new Result<T>()
+        {Message = message, TypeResult = TypeResult.Unauthorized };
+
 
 }

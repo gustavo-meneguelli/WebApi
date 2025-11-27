@@ -1,6 +1,7 @@
 using Application.DTO;
 using Application.Enums;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -9,6 +10,7 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class ProductsController(IProductService service) : ControllerBase
 {
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {

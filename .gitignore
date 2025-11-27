@@ -48,7 +48,16 @@ CodeCoverage/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# NUnit
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+.idea/
+*.sln.iml
+
+secrets.json
+
+# Banco de Dados Local (SQLite)
+*.db
+*.db-shm
+*.db-wal
