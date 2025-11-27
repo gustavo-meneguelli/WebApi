@@ -1,6 +1,7 @@
 using Application.DTO;
 using Application.Interfaces;
 using Application.Utilities;
+using Domain.Enums;
 using Domain.Models;
 
 namespace Application.Services;
@@ -37,9 +38,9 @@ public class AuthService(IUserRepository userRepository, IPasswordHash passwordH
         {
             return Result<string>.Duplicate("User already exists");
         }
-
+        
         var user = new User
-            { Username = dto.Username, PasswordHash = passwordHash.HashPassword(dto.Password), Role = dto.UserRole };
+            { Username = dto.Username, PasswordHash = passwordHash.HashPassword(dto.Password), Role = UserRole.Common};
         
         await userRepository.AddUserAsync(user);
         
