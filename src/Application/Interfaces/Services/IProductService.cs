@@ -1,8 +1,8 @@
-using Application.DTO;
-using Application.Utilities;
-using Domain.Models;
+using Application.Common.Models;
+using Application.DTOs.Products;
+using Domain.Entities;
 
-namespace Application.Interfaces;
+namespace Application.Interfaces.Services;
 
 public interface IProductService
 {

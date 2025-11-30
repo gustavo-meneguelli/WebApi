@@ -1,4 +1,4 @@
-namespace Application.DTO;
+namespace Application.DTOs.Auth;
 
 public class LoginDto
 {

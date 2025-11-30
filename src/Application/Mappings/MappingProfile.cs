@@ -1,6 +1,6 @@
-using Application.DTO;
+using Application.DTOs.Products;
 using AutoMapper;
-using Domain.Models;
+using Domain.Entities;
 
 namespace Application.Mappings;
 

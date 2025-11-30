@@ -1,4 +1,4 @@
-namespace Application.DTO;
+namespace Application.Common.Models;
 
 public class PaginationParams
 {

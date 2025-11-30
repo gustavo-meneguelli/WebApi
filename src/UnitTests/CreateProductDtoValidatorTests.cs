@@ -1,5 +1,5 @@
-using Application.DTO;
-using Application.Validators;
+using Application.DTOs.Products;
+using Application.Validators.Products;
 
 namespace UnitTests;
 

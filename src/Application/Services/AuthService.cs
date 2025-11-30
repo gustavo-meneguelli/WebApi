@@ -1,8 +1,10 @@
-using Application.DTO;
-using Application.Interfaces;
-using Application.Utilities;
+using Application.Common.Models;
+using Application.DTOs.Auth;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Security;
+using Application.Interfaces.Services;
+using Domain.Entities;
 using Domain.Enums;
-using Domain.Models;
 
 namespace Application.Services;
 

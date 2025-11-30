@@ -1,6 +1,8 @@
 using Application.Interfaces;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Security;
+using Domain.Entities;
 using Domain.Enums;
-using Domain.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Data;

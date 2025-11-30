@@ -1,6 +1,6 @@
-using Application.DTO;
+using Application.DTOs.Auth;
 using Application.Enums;
-using Application.Interfaces;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

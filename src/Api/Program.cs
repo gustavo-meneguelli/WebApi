@@ -1,5 +1,6 @@
 using Api.Extensions; 
 using Application.Validators;
+using Application.Validators.Products;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Serilog;

@@ -1,4 +1,3 @@
-## --- Build e Compilação (.NET Padrão) ---
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -29,7 +28,6 @@ artifacts/
 *.sln.docstates
 
 
-# Isso resolve o arquivo WebApi.sln.DotSettings.user da sua imagem
 .idea/
 *.sln.iml
 *.DotSettings.user
@@ -37,16 +35,14 @@ artifacts/
 
 .vscode/
 
-## --- Banco de Dados e Segredos ---
-# SQLite (Garante que o loja.db não suba)
+# SQLite
 *.db
 *.db-shm
 *.db-wal
 
-# Segredos locais
 secrets.json
 
-## --- Arquivos Temporários ---
+
 ScaffoldingReadMe.txt
 ~$*
 *~

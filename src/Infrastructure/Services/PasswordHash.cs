@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Interfaces.Security;
 
 namespace Infrastructure.Services;
 
