@@ -43,6 +43,10 @@ public static class AppServiceExtension
                 In = ParameterLocation.Header,
                 Description = "Insira o token JWT desta maneira: Bearer {seu token}"
             });
+            
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            c.IncludeXmlComments(xmlPath);
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
