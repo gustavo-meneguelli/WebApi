@@ -14,10 +14,15 @@ public static class AppServiceExtension
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
-        var connectionString = config.GetConnectionString("DefaultConnection")
-                               ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        var connectionString = config.GetConnectionString("DefaultConnection") 
+                               ?? config["DATABASE_URL"];
+        
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException("Connection string not found. Checked 'DefaultConnection' and 'DATABASE_URL'.");
+        }
 
-        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductService, ProductService>();
@@ -105,9 +110,11 @@ public static class AppServiceExtension
 
         try
         {
-            var context = services.GetRequiredService<DbSeeder>();
+            var dbContext = services.GetRequiredService<AppDbContext>();
+            await dbContext.Database.MigrateAsync(); 
 
-            await context.SeedAsync();
+            var seeder = services.GetRequiredService<DbSeeder>();
+            await seeder.SeedAsync();
         }
         catch (Exception ex)
         {
