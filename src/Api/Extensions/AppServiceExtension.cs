@@ -1,8 +1,11 @@
+using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Security;
 using Application.Interfaces.Services;
 using Application.Services;
+using Domain.Entities;
 using Infrastructure.Data;
+using Infrastructure.Generics;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,6 +29,7 @@ public static class AppServiceExtension
 
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
+        services.AddScoped<IRepository<Product>, Repository<Product>>(); 
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPasswordHash, PasswordHash>();

@@ -1,19 +1,21 @@
 using Application.Common.Models;
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
+using Infrastructure.Generics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class ProductRepository(AppDbContext context) : IProductRepository
+public class ProductRepository(AppDbContext context) : Repository<Product>(context), IProductRepository
 {
+    private readonly AppDbContext _context = context;
+
     public async Task<PagedResult<Product>> GetAllAsync(PaginationParams paginationParams)
     {
-        var totalCount = await context.Products.CountAsync();
+        var totalCount = await _context.Products.CountAsync();
 
-        var items = await context.Products
+        var items = await _context.Products
             .OrderBy(p => p.Id)
             .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
             .Take(paginationParams.PageSize)
@@ -32,36 +34,14 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         };
     }
 
-    public async Task<Product?> GetByIdAsync(int id)
-    {
-        return await context.Products.FirstOrDefaultAsync(p => p.Id == id);
-    }
-
     public async Task<Product?> GetByNameAsync(string name)
     {
-        return await context.Products.FirstOrDefaultAsync(p => p.Name == name);
-    }
-
-    public async Task<Product> AddAsync(Product product)
-    {
-        await context.Products.AddAsync(product);
-        await context.SaveChangesAsync();
-        return product;
-    }
-
-    public async Task UpdateAsync(Product product)
-    {
-        await context.SaveChangesAsync();
+        return await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
     }
 
     public async Task<bool> ExistByNameAsync(string name)
     {
-        return await context.Products.AnyAsync(p => p.Name == name);
+        return await _context.Products.AnyAsync(p => p.Name == name);
     }
 
-    public async Task DeleteAsync(Product product)
-    {
-        context.Products.Remove(product);
-        await context.SaveChangesAsync();
-    }
 }
