@@ -2,6 +2,6 @@ namespace Application.DTO.Auth;
 
 public class LoginDto
 {
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public string Username { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }

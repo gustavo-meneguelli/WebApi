@@ -1,6 +1,9 @@
 namespace Api.Middlewares;
 
-public class GlobalErrorHandlerMiddleware(RequestDelegate next, ILogger<GlobalErrorHandlerMiddleware> logger)
+public class GlobalErrorHandlerMiddleware(
+    RequestDelegate next, 
+    ILogger<GlobalErrorHandlerMiddleware> logger,
+    IWebHostEnvironment environment)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -15,7 +18,7 @@ public class GlobalErrorHandlerMiddleware(RequestDelegate next, ILogger<GlobalEr
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
@@ -24,7 +27,7 @@ public class GlobalErrorHandlerMiddleware(RequestDelegate next, ILogger<GlobalEr
         {
             Status = context.Response.StatusCode,
             Message = "Ocorreu um erro interno no servidor. Tente novamente mais tarde.",
-            Detailed = exception.Message
+            Detailed = environment.IsDevelopment() ? exception.Message : null
         };
 
         var json = System.Text.Json.JsonSerializer.Serialize(errorResponse);

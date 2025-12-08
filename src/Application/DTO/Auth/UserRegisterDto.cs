@@ -1,10 +1,7 @@
-using Domain.Enums;
-
 namespace Application.DTO.Auth;
 
 public class UserRegisterDto
 {
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public UserRole UserRole { get; set; } = UserRole.Common;
+    public string Username { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }
