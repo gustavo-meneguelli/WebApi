@@ -16,10 +16,11 @@ public class CategoriesController(
     : MainController
 {
     /// <summary>
-    /// Recupera a lista completa de categorias.
+    /// Recupera uma lista paginada de categorias.
     /// </summary>
-    /// <returns>Uma lista contendo Id e Nome das categorias.</returns>
-    /// <response code="200">Retorna a lista de categorias com sucesso.</response>
+    /// <param name="paginationParams">Parâmetros de paginação (pageNumber e pageSize).</param>
+    /// <returns>Retorna um objeto PagedResult contendo a lista e metadados.</returns>
+    /// <response code="200">Retorna a lista de categorias (pode estar vazia).</response>
     /// <response code="401">Usuário não autenticado.</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -59,13 +60,15 @@ public class CategoriesController(
     /// <param name="dto">Dados da nova categoria (Nome).</param>
     /// <returns>A categoria recém-criada.</returns>
     /// <response code="201">Categoria criada com sucesso.</response>
-    /// <response code="400">Dados inválidos (ex:Nome vazio ou curto demais).</response>
+    /// <response code="400">Dados inválidos (ex: Nome vazio ou curto demais).</response>
+    /// <response code="409">Já existe uma categoria com este nome.</response>
     /// <response code="401">Usuário não autenticado.</response>
     /// <response code="403">Acesso negado (apenas Admins podem criar).</response>
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateCategoryDto dto)

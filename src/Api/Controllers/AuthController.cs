@@ -19,9 +19,11 @@ public class AuthController(
     /// <param name="dto">Objeto contendo nome de usuário e senha.</param>
     /// <returns>Retorna um token JWT se as credenciais forem válidas.</returns>
     /// <response code="200">Login realizado com sucesso. Retorna o Token.</response>
+    /// <response code="400">Dados inválidos (ex: campos vazios).</response>
     /// <response code="401">Usuário ou senha inválidos.</response>
     [HttpPost("Login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
@@ -44,7 +46,7 @@ public class AuthController(
     /// <returns>Mensagem de sucesso.</returns>
     /// <response code="200">Usuário registrado com sucesso.</response>
     /// <response code="400">Dados inválidos (ex: senha vazia).</response>
-    /// <response code="409">Nome de usuário já está em uso.</response>
+    /// <response code="409">Já existe um usuário com este nome.</response>
     [HttpPost("Register")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

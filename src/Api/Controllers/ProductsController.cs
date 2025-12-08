@@ -19,7 +19,7 @@ public class ProductsController(
     /// <summary>
     /// Recupera uma lista paginada de produtos.
     /// </summary>
-    /// <param name="paginationParams">Parâmetros de paginação (número da página e tamanho).</param>
+    /// <param name="paginationParams">Parâmetros de paginação (pageNumber e pageSize).</param>
     /// <returns>Retorna um objeto PagedResult contendo a lista e metadados.</returns>
     /// <response code="200">Retorna a lista de produtos (pode estar vazia).</response>
     /// <response code="401">Usuário não autenticado.</response>
@@ -85,10 +85,12 @@ public class ProductsController(
     }
 
     /// <summary>
-    /// Atualiza os dados de um produto existente.
+    /// Atualiza os dados de um produto existente (update parcial).
     /// </summary>
     /// <remarks>
     /// Requer permissão de **Admin**.
+    /// 
+    /// **Update Parcial:** Campos vazios ou zero são ignorados (não serão atualizados).
     /// A atualização valida se o novo nome já existe em outro produto para evitar duplicatas.
     /// </remarks>
     /// <param name="id">ID do produto a ser atualizado.</param>
