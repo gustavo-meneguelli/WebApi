@@ -6,10 +6,14 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuração de Logs (Serilog)
-builder.Host.UseSerilog((_, configuration) =>
+builder.Host.UseSerilog((context, configuration) =>
     configuration
-        .WriteTo.Console() 
-        .WriteTo.File("logs/api-log-.txt", rollingInterval: RollingInterval.Day)
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+        .WriteTo.File("logs/api-log-.txt", 
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
         .MinimumLevel.Information());
 
 // Serviços Básicos
