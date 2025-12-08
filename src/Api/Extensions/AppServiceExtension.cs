@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Security;
 using Application.Interfaces.Services;
 using Application.Services;
-using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Generics;
 using Infrastructure.Repositories;
@@ -32,8 +31,6 @@ public static class AppServiceExtension
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<IRepository<User>, Repository<User>>();
-        services.AddScoped<IRepository<Product>, Repository<Product>>(); 
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPasswordHash, PasswordHash>();

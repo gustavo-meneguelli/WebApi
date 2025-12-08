@@ -17,7 +17,10 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
             .HasQueryFilter(p => !p.IsDeleted);
 
         modelBuilder.Entity<User>()
-            .HasQueryFilter(u => !u.IsDeleted);//Exibe apenas usuários que não foram deletados
+            .HasQueryFilter(u => !u.IsDeleted); //Exibe apenas usuários que não foram deletados
+        
+        modelBuilder.Entity<Category>()
+            .HasQueryFilter(c => !c.IsDeleted); //Exibe apenas categorias que não foram deletadas
         
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Category)

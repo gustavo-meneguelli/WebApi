@@ -21,17 +21,16 @@ public class Repository<T>(AppDbContext context) : IRepository<T> where T : clas
         return entity;
     }
 
-    public async Task UpdateAsync(T entity)
+    public Task UpdateAsync(T entity)
     {
         context.Set<T>().Update(entity);
-        
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(T entity)
+    public Task DeleteAsync(T entity)
     {
         context.Set<T>().Remove(entity);
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public async Task<PagedResult<T>> GetAllAsync(
