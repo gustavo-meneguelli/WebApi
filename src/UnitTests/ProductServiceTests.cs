@@ -16,7 +16,6 @@ public class ProductServiceTests
     {
         // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         
         var configuration = new MapperConfiguration(cfg => 
@@ -39,7 +38,6 @@ public class ProductServiceTests
         
         var service = new ProductService(
             productRepositoryMock.Object, 
-            categoryRepositoryMock.Object, 
             mapper, 
             unitOfWorkMock.Object);
 
@@ -57,7 +55,6 @@ public class ProductServiceTests
     {
         // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var mapperMock = new Mock<IMapper>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
@@ -67,7 +64,6 @@ public class ProductServiceTests
 
         var service = new ProductService(
             productRepositoryMock.Object, 
-            categoryRepositoryMock.Object, 
             mapperMock.Object, 
             unitOfWorkMock.Object);
 
@@ -82,58 +78,12 @@ public class ProductServiceTests
         Assert.Equal(expectedMessage, result.Message);
     }
     
-    [Fact]
-    public async Task UpdateAsync_ShouldReturnDuplicated_WhenNameAlreadyExists()
-    {
-        // ARRANGE
-        var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
-        var mapperMock = new Mock<IMapper>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        
-        var existingProduct = new Product 
-        { 
-            Id = 1, 
-            Name = "Teste", 
-            Price = 10,
-            CategoryId = 1
-        };
-        
-        //Simula que o produto ID 1 existe
-        productRepositoryMock
-            .Setup(repo => repo.GetByIdAsync(1))
-            .ReturnsAsync(existingProduct);
-
-        //Simula que o novo nome "Outro Teste" já existe no banco
-        productRepositoryMock
-            .Setup(repo => repo.ExistByNameAsync("Outro Teste"))
-            .ReturnsAsync(true);
-        
-        var service = new ProductService(
-            productRepositoryMock.Object, 
-            categoryRepositoryMock.Object, 
-            mapperMock.Object, 
-            unitOfWorkMock.Object);
-
-        var dto = new UpdateProductDto { Name = "Outro Teste", Price = 20, CategoryId = 1 };
-
-        // ACT
-        var result = await service.UpdateAsync(1, dto);
-        
-        // ASSERT
-        Assert.NotNull(result);
-        Assert.Equal(Application.Enums.TypeResult.Duplicated, result.TypeResult);
-        
-        var expectedMessage = string.Format(ErrorMessages.AlreadyExists, "produto", "nome");
-        Assert.Equal(expectedMessage, result.Message);
-    }
-
+    
     [Fact]
     public async Task UpdateAsync_ShouldReturnSuccess_WhenDataIsValid()
     {
         // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         
         // Setup do Mapper Real
@@ -154,7 +104,6 @@ public class ProductServiceTests
 
         var service = new ProductService(
             productRepositoryMock.Object, 
-            categoryRepositoryMock.Object, 
             mapper,
             unitOfWorkMock.Object);
         
@@ -178,7 +127,6 @@ public class ProductServiceTests
     {
         // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         
         var mapperMock = new MapperConfiguration(cfg => 
@@ -196,7 +144,6 @@ public class ProductServiceTests
         
         var service = new ProductService(
             productRepositoryMock.Object, 
-            categoryRepositoryMock.Object, 
             mapper, 
             unitOfWorkMock.Object);
         

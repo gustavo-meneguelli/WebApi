@@ -36,14 +36,6 @@ public class CategoryService(ICategoryRepository repository, IMapper mapper, IUn
 
     public async Task<Result<CategoryResponseDto>> AddAsync(CreateCategoryDto dto)
     {
-        
-        var categoryExists = await repository.ExistsByNameAsync(dto.Name);
-
-        if (categoryExists)
-        {
-            return Result<CategoryResponseDto>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "Categoria", "nome"));
-        }
-        
         var category = mapper.Map<Category>(dto);
         
         await repository.AddAsync(category);

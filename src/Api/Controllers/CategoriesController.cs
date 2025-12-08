@@ -1,5 +1,6 @@
 using Application.DTO.Categories;
 using Application.Interfaces.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,10 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriesController(ICategoryService service) : MainController
+public class CategoriesController(
+    ICategoryService service,
+    IValidator<CreateCategoryDto> validator)
+    : MainController
 {
     /// <summary>
     /// Recupera a lista completa de categorias.
@@ -65,6 +69,10 @@ public class CategoriesController(ICategoryService service) : MainController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateCategoryDto dto)
     {
+        var validationResult = await validator.ValidateAsync(dto);
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
         var result = await service.AddAsync(dto);
         
         return ParseResult(result);

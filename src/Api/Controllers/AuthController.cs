@@ -1,12 +1,17 @@
 using Application.DTO.Auth;
 using Application.Interfaces.Security;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthService authService) : MainController
+public class AuthController(
+    IAuthService authService,
+    IValidator<LoginDto> loginValidator,
+    IValidator<UserRegisterDto> registerValidator)
+    : MainController
 {
     /// <summary>
     /// Realiza o login de um usuário existente.
@@ -20,6 +25,10 @@ public class AuthController(IAuthService authService) : MainController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
+        var validationResult = await loginValidator.ValidateAsync(dto);
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
         var result = await authService.LoginAsync(dto);
 
         return ParseResult(result);
@@ -42,6 +51,10 @@ public class AuthController(IAuthService authService) : MainController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
     {
+        var validationResult = await registerValidator.ValidateAsync(dto);
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
         var result = await authService.RegisterAsync(dto);
         
         return ParseResult(result);

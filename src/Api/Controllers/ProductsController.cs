@@ -12,7 +12,8 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class ProductsController(
     IProductService service,
-    IValidator<CreateProductDto> validator)
+    IValidator<CreateProductDto> createValidator,
+    IValidator<UpdateProductDto> updateValidator)
     : MainController
 {
     /// <summary>
@@ -73,7 +74,7 @@ public class ProductsController(
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddAsync(CreateProductDto dto)
     {
-        var validationResult = await validator.ValidateAsync(dto);
+        var validationResult = await createValidator.ValidateAsync(dto);
         
         var validationResponse = CustomResponse(validationResult);
         if (validationResponse is not null) return validationResponse;
@@ -109,6 +110,10 @@ public class ProductsController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateProductDto dto)
     {
+        var validationResult = await updateValidator.ValidateAsync(dto);
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
         var result = await service.UpdateAsync(id, dto);
 
         return ParseResult(result);

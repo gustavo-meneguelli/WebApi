@@ -12,7 +12,6 @@ namespace Application.Services;
 
 public class ProductService(
     IProductRepository productRepository,
-    ICategoryRepository categoryRepository,
     IMapper mapper,
     IUnitOfWork unitOfWork) : IProductService
 {
@@ -74,38 +73,11 @@ public class ProductService(
             return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Produto"));
         }
 
-        bool isNecessaryChangeName = dto.Name != string.Empty && dto.Name != product.Name;
-
-        if (isNecessaryChangeName)
-        {
-            bool nameExists = await productRepository.ExistByNameAsync(dto.Name);
-
-            if (nameExists)
-            {
-                return Result<ProductResponseDto?>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "produto", "nome"));
-            }
-        }
-        
-        bool isNecessaryChangeCategoryId = dto.CategoryId != 0 && dto.CategoryId != product.CategoryId;
-
-        if (isNecessaryChangeCategoryId)
-        {
-            var category = await categoryRepository.GetByIdAsync(dto.CategoryId);
-            
-            if (category is null)
-            {
-                return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Categoria"));
-            }
-        }
-
         mapper.Map(dto, product);
-
         await productRepository.UpdateAsync(product);
-        
         await unitOfWork.CommitAsync();
 
         var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
-
         return Result<ProductResponseDto?>.Success(productResponseDto);
     }
 

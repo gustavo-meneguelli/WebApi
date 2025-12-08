@@ -36,20 +36,17 @@ public class AuthService(IUserRepository userRepository, IPasswordHash passwordH
 
     public async Task<Result<string>> RegisterAsync(UserRegisterDto dto)
     {
-        var userExists = await userRepository.GetUserByUsernameAsync(dto.Username);
-
-        if (userExists is not null)
-        {
-            return Result<string>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "usuário", "username"));
-        }
-        
         var user = new User
-            { Username = dto.Username, PasswordHash = passwordHash.HashPassword(dto.Password), Role = UserRole.Common};
+        {
+            Username = dto.Username,
+            PasswordHash = passwordHash.HashPassword(dto.Password),
+            Role = UserRole.Common
+        };
         
         await userRepository.AddAsync(user);
         
         await unitOfWork.CommitAsync();
         
-        return Result<string>.Success("User created with success");
+        return Result<string>.Success("Usuário criado com sucesso");
     }
 }
