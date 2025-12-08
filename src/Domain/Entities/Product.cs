@@ -11,6 +11,11 @@ public class Product : Entity
     
     public int CategoryId { get; set; }
     
-    [JsonIgnore] 
+    [JsonIgnore]
     public Category? Category { get; set; }
+
+    public override string ToString()
+    {
+        return $"Product {{ Id = {Id}, Name = \"{Name}\", Price = {Price:C}, CategoryId = {CategoryId} }}";
+    }
 }

@@ -32,7 +32,7 @@ public class TokenService(IConfiguration configuration) : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(8),
+            Expires = DateTime.UtcNow.AddHours(int.TryParse(configuration["JwtSettings:ExpirationHours"], out var hours) ? hours : 8),
             SigningCredentials = credentials,
             
         };
