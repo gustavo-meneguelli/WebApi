@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.DTO.Products;
-using Application.Enums;
 using Application.Interfaces.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +10,10 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(IProductService service) : ControllerBase
+public class ProductsController(
+    IProductService service,
+    IValidator<CreateProductDto> validator)
+    : MainController
 {
     /// <summary>
     /// Recupera uma lista paginada de produtos.
@@ -25,9 +28,9 @@ public class ProductsController(IProductService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
-        var serviceResult = await service.GetAllAsync(paginationParams);
+        var result = await service.GetAllAsync(paginationParams);
         
-        return Ok(serviceResult.Data);
+        return ParseResult(result);
     }
 
     /// <summary>
@@ -43,14 +46,9 @@ public class ProductsController(IProductService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
-        var serviceResult = await service.GetByIdAsync(id);
+        var result = await service.GetByIdAsync(id);
 
-        if (serviceResult.TypeResult is TypeResult.NotFound)
-        {
-            return NotFound(serviceResult.Message);
-        }
-        
-        return Ok(serviceResult.Data);
+        return ParseResult(result);
     }
 
     /// <summary>
@@ -75,19 +73,14 @@ public class ProductsController(IProductService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> AddAsync(CreateProductDto dto)
     {
-        var serviceResult = await service.AddAsync(dto);
+        var validationResult = await validator.ValidateAsync(dto);
+        
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
+        var result = await service.AddAsync(dto);
 
-        switch (serviceResult.TypeResult)
-        {
-            case TypeResult.Created when serviceResult.Data != null:
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = serviceResult.Data.Id }, serviceResult.Data);
-            case TypeResult.NotFound:
-                return NotFound(serviceResult.Message);
-            case TypeResult.Duplicated:
-                return Conflict(serviceResult.Message);
-            default:
-                return Problem("Something went wrong.");
-        }
+        return ParseResult(result);
     }
 
     /// <summary>
@@ -116,14 +109,9 @@ public class ProductsController(IProductService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateProductDto dto)
     {
-        var serviceResult = await service.UpdateAsync(id, dto);
+        var result = await service.UpdateAsync(id, dto);
 
-        return serviceResult.TypeResult switch
-        {
-            TypeResult.NotFound => NotFound(serviceResult.Message),
-            TypeResult.Duplicated => Conflict(serviceResult.Message),
-            _ => Ok(serviceResult.Data)
-        };
+        return ParseResult(result);
     }
 
     /// <summary>
@@ -146,13 +134,8 @@ public class ProductsController(IProductService service) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsync(int id)
     {
-        var serviceResult = await service.DeleteAsync(id);
+        var result = await service.DeleteAsync(id);
 
-        if (serviceResult.TypeResult == TypeResult.NotFound)
-        {
-            return NotFound(serviceResult.Message);
-        }
-        
-        return NoContent();
+        return ParseResult(result);
     }
 }

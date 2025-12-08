@@ -4,6 +4,7 @@ using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
+using Domain.Constants;
 using Domain.Entities;
 
 namespace Application.Services;
@@ -25,7 +26,7 @@ public class CategoryService(ICategoryRepository repository, IMapper mapper, IUn
 
         if (category is null)
         {
-            return Result<CategoryResponseDto>.NotFound("Category not found.");
+            return Result<CategoryResponseDto>.NotFound(string.Format(ErrorMessages.NotFound, "Categoria"));
         }
 
         var dto = mapper.Map<CategoryResponseDto>(category);
@@ -40,7 +41,7 @@ public class CategoryService(ICategoryRepository repository, IMapper mapper, IUn
 
         if (categoryExists)
         {
-            return Result<CategoryResponseDto>.Duplicate("Category with the same name already exists.");
+            return Result<CategoryResponseDto>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "Categoria", "nome"));
         }
         
         var category = mapper.Map<Category>(dto);

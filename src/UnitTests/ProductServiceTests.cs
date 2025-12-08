@@ -5,6 +5,7 @@ using Application.Services;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Constants;
 
 namespace UnitTests;
 
@@ -16,12 +17,13 @@ public class ProductServiceTests
         // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        
         var configuration = new MapperConfiguration(cfg => 
         {
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
         var mapper = configuration.CreateMapper();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
 
         var model = new Product 
         { 
@@ -35,7 +37,11 @@ public class ProductServiceTests
             .Setup(repo => repo.GetByIdAsync(1))
             .ReturnsAsync(model);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
+        var service = new ProductService(
+            productRepositoryMock.Object, 
+            categoryRepositoryMock.Object, 
+            mapper, 
+            unitOfWorkMock.Object);
 
         // ACT
         var result = await service.GetByIdAsync(1);
@@ -53,14 +59,17 @@ public class ProductServiceTests
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var mapperMock = new Mock<IMapper>();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
-
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         productRepositoryMock
             .Setup(repo => repo.GetByIdAsync(99))
             .ReturnsAsync((Product?)null); 
 
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object, unitToWorkMock.Object);
+        var service = new ProductService(
+            productRepositoryMock.Object, 
+            categoryRepositoryMock.Object, 
+            mapperMock.Object, 
+            unitOfWorkMock.Object);
 
         // ACT
         var result = await service.GetByIdAsync(99);
@@ -68,160 +77,139 @@ public class ProductServiceTests
         // ASSERT
         Assert.NotNull(result);
         Assert.Equal(Application.Enums.TypeResult.NotFound, result.TypeResult);
-        Assert.Equal("No products were found with this ID.", result.Message);
+        
+        var expectedMessage = string.Format(ErrorMessages.NotFound, "Produto");
+        Assert.Equal(expectedMessage, result.Message);
     }
     
     [Fact]
-    public async Task UpdateAsync_ShouldReturnDuplicated_WhenProductExists()
+    public async Task UpdateAsync_ShouldReturnDuplicated_WhenNameAlreadyExists()
     {
-        //ARRANGE
+        // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var mapperMock = new Mock<IMapper>();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
         
-        var model = new Product 
+        var existingProduct = new Product 
         { 
             Id = 1, 
             Name = "Teste", 
-            Price = 10 ,
+            Price = 10,
             CategoryId = 1
         };
         
+        //Simula que o produto ID 1 existe
         productRepositoryMock
             .Setup(repo => repo.GetByIdAsync(1))
-            .ReturnsAsync(model);
+            .ReturnsAsync(existingProduct);
 
+        //Simula que o novo nome "Outro Teste" já existe no banco
         productRepositoryMock
             .Setup(repo => repo.ExistByNameAsync("Outro Teste"))
             .ReturnsAsync(true);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object, unitToWorkMock.Object);
+        var service = new ProductService(
+            productRepositoryMock.Object, 
+            categoryRepositoryMock.Object, 
+            mapperMock.Object, 
+            unitOfWorkMock.Object);
 
-        //ACT
-        var fakeDto = new UpdateProductDto { Name = "Outro Teste",  Price = 10 };
-        var result = await service.UpdateAsync(1, fakeDto);
+        var dto = new UpdateProductDto { Name = "Outro Teste", Price = 20, CategoryId = 1 };
+
+        // ACT
+        var result = await service.UpdateAsync(1, dto);
         
-        //ASSERT
+        // ASSERT
         Assert.NotNull(result);
         Assert.Equal(Application.Enums.TypeResult.Duplicated, result.TypeResult);
-        Assert.Equal("Product with that name already exists.", result.Message);
+        
+        var expectedMessage = string.Format(ErrorMessages.AlreadyExists, "produto", "nome");
+        Assert.Equal(expectedMessage, result.Message);
     }
 
     [Fact]
     public async Task UpdateAsync_ShouldReturnSuccess_WhenDataIsValid()
     {
-        //ARRANGE
+        // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
-        var configuration = new MapperConfiguration(cfg => 
-        {
-            cfg.AddProfile(new Application.Mappings.MappingProfile());
-        });
-        var mapper = configuration.CreateMapper();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        
+        // Setup do Mapper Real
+        var config = new MapperConfiguration(cfg => cfg.AddProfile(new Application.Mappings.MappingProfile()));
+        var mapper = config.CreateMapper();
 
-        
-        
-        var model = new Product 
-        { 
-            Id = 1, 
-            Name = "Teste", 
-            Price = 10,
-            CategoryId = 1
-        };
+        // Produto original no banco
+        var originalProduct = new Product { Id = 1, Name = "Original", Price = 10, CategoryId = 1 };
         
         productRepositoryMock
             .Setup(repo => repo.GetByIdAsync(1))
-            .ReturnsAsync(model);
+            .ReturnsAsync(originalProduct);
+
+        // Setup para validar que o nome novo não existe (se mudou de nome)
         productRepositoryMock
-            .Setup(repo => repo.ExistByNameAsync("Outro Teste"))
+            .Setup(repo => repo.ExistByNameAsync("Novo Nome"))
             .ReturnsAsync(false);
+
+        var service = new ProductService(
+            productRepositoryMock.Object, 
+            categoryRepositoryMock.Object, 
+            mapper,
+            unitOfWorkMock.Object);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
+        var updateDto = new UpdateProductDto { Name = "Novo Nome", Price = 20, CategoryId = 1 };
+
+        // ACT
+        var result = await service.UpdateAsync(1, updateDto);
         
-        //ACT
-        var fakeDto = new UpdateProductDto { Name = "Outro Teste",  Price = 10 };
-        var result = await service.UpdateAsync(1, fakeDto);
-        
-        //ASSERT
-        Assert.NotNull(result);
+        // ASSERT
+        Assert.NotNull(result.Data);
         Assert.Equal(Application.Enums.TypeResult.Success, result.TypeResult);
-        Assert.Equal("Outro Teste", result.Data?.Name);
-    }
-
-    [Fact]
-    public async Task AddAsync_ShouldReturnError_WhenNameIsDuplicate()
-    {
-        //ARRANGE
-        var productRepositoryMock = new Mock<IProductRepository>();
-        var categoryRepositoryMock = new Mock<ICategoryRepository>();
-        var configuration = new MapperConfiguration(cfg => 
-        {
-            cfg.AddProfile(new Application.Mappings.MappingProfile());
-        });
-        var mapper = configuration.CreateMapper();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
-
-
-        var model = new CreateProductDto
-        {
-            Name = "Teste",
-            Price = 10,
-            CategoryId = 1
-        };
+        Assert.Equal("Novo Nome", result.Data.Name); // Verifica se o Mapper atualizou o retorno
         
-        productRepositoryMock
-            .Setup(repo => repo.ExistByNameAsync(model.Name))
-            .ReturnsAsync(true);
-        
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
-        
-        //ACT
-        var result = await service.AddAsync(model);
-        
-        //ASSERT
-        Assert.NotNull(result);
-        Assert.Equal(Application.Enums.TypeResult.Duplicated ,result.TypeResult);
+        // Verifica se chamou Update e Commit
+        productRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Product>()), Times.Once);
+        unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
     }
 
     [Fact]
     public async Task AddAsync_ShouldReturnSuccess_WhenDataIsValid()
     {
-        //ARRANGE
+        // ARRANGE
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        
         var mapperMock = new MapperConfiguration(cfg => 
         {
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
         var mapper = mapperMock.CreateMapper();
-        var unitToWorkMock = new Mock<IUnitOfWork>();
 
-        var model = new CreateProductDto()
+        var dto = new CreateProductDto()
         {
             Name = "Teste",
             Price = 10,
             CategoryId = 1
         };
         
-        productRepositoryMock
-            .Setup(repo => repo.ExistByNameAsync(model.Name))
-            .ReturnsAsync(false);
+        var service = new ProductService(
+            productRepositoryMock.Object, 
+            categoryRepositoryMock.Object, 
+            mapper, 
+            unitOfWorkMock.Object);
         
-        categoryRepositoryMock
-            .Setup(repo => repo.GetByIdAsync(1))
-            .ReturnsAsync(new Category { Id = 1, Name = "Categoria Teste" });
+        // ACT
+        var result = await service.AddAsync(dto);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
-        
-        //ACT
-        var result = await service.AddAsync(model);
-        
-        //ASSERT
+        // ASSERT
         Assert.NotNull(result.Data);
         Assert.Equal(Application.Enums.TypeResult.Created, result.TypeResult);
-        Assert.Equal(model.Name, result.Data.Name);
-        Assert.Equal(model.Price, result.Data.Price);
+        Assert.Equal(dto.Name, result.Data.Name);
+        
+        // Verifica se chamou Add e Commit
+        productRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Product>()), Times.Once);
+        unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
     }
 }

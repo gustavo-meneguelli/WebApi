@@ -1,5 +1,4 @@
 using Application.DTO.Auth;
-using Application.Enums;
 using Application.Interfaces.Security;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +6,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService) : MainController
 {
     /// <summary>
     /// Realiza o login de um usuário existente.
@@ -21,14 +20,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var auth = await authService.LoginAsync(dto);
+        var result = await authService.LoginAsync(dto);
 
-        if (auth.TypeResult == TypeResult.Unauthorized)
-        {
-            return Unauthorized(auth.Message);
-        }
-        
-        return Ok(auth.Data);
+        return ParseResult(result);
     }
 
     /// <summary>
@@ -48,13 +42,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
     {
-        var auth = await authService.RegisterAsync(dto);
+        var result = await authService.RegisterAsync(dto);
         
-        if (auth.TypeResult == TypeResult.Duplicated)
-        {
-            return Conflict(auth.Message);
-        }
-        
-        return Ok(auth.Data);
+        return ParseResult(result);
     }
 }

@@ -4,6 +4,7 @@ using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
+using Domain.Constants;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,7 +43,7 @@ public class ProductService(
 
         if (product is null)
         {
-            return Result<ProductResponseDto?>.NotFound("No products were found with this ID.");
+            return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Produto"));
         }
 
         var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
@@ -53,24 +54,10 @@ public class ProductService(
 
     public async Task<Result<ProductResponseDto>> AddAsync(CreateProductDto dto)
     {
-        bool productExists = await productRepository.ExistByNameAsync(dto.Name);
-
-        if (productExists)
-        {
-            return Result<ProductResponseDto>.Duplicate("Product with that name already exists.");
-        }
-        
-        var category = await categoryRepository.GetByIdAsync(dto.CategoryId);
-
-        if (category is null)
-        {
-            return Result<ProductResponseDto>.NotFound("No category found with this ID.");
-        }
-
         var product = mapper.Map<Product>(dto);
 
         await productRepository.AddAsync(product);
-        
+    
         await unitOfWork.CommitAsync();
 
         var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
@@ -84,7 +71,7 @@ public class ProductService(
 
         if (product is null)
         {
-            return Result<ProductResponseDto?>.NotFound("No products were found with this ID.");
+            return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Produto"));
         }
 
         bool isNecessaryChangeName = dto.Name != string.Empty && dto.Name != product.Name;
@@ -95,7 +82,7 @@ public class ProductService(
 
             if (nameExists)
             {
-                return Result<ProductResponseDto?>.Duplicate("Product with that name already exists.");
+                return Result<ProductResponseDto?>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "produto", "nome"));
             }
         }
         
@@ -107,7 +94,7 @@ public class ProductService(
             
             if (category is null)
             {
-                return Result<ProductResponseDto?>.NotFound("No category found with this ID.");
+                return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Categoria"));
             }
         }
 
@@ -128,13 +115,13 @@ public class ProductService(
 
         if (product is null)
         {
-            return Result<ProductResponseDto?>.NotFound("No product were found with this ID.");
+            return Result<ProductResponseDto?>.NotFound(string.Format(ErrorMessages.NotFound, "Produto"));
         }
 
         await productRepository.DeleteAsync(product);
 
-        var productReponseDto = mapper.Map<Product, ProductResponseDto>(product);
+        var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
 
-        return Result<ProductResponseDto?>.Success(productReponseDto);
+        return Result<ProductResponseDto?>.Success(productResponseDto);
     }
 }

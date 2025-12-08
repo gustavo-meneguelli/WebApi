@@ -1,7 +1,6 @@
 using Api.Extensions; 
 using Application.Validators;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +21,6 @@ builder.Services.AddSwaggerConfig();
 builder.Services.AddJwtConfig(builder.Configuration);           
 
 // FluentValidation, AutoMapper
-builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
 

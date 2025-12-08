@@ -68,4 +68,28 @@ public class ProductsControllerTests(CustomWebApplicationFactory<Program> factor
         Assert.Equal("Teclado Mecânico", returnedProduct.Name);
         Assert.True(returnedProduct.Id > 0);
     }
+    
+    [Fact]
+    public async Task Post_ShouldReturnBadRequest_WhenNameIsDuplicate()
+    {
+        // 1. ARRANGE
+        await Authenticate();
+        
+        var newCategory = new CreateCategoryDto { Name = "Tech" };
+        var categoryResponse = await _client.PostAsJsonAsync("/api/categories", newCategory);
+
+        // Cria o primeiro
+        var product1 = new CreateProductDto { Name = "Duplicado", Price = 100, CategoryId = 1 };
+        await _client.PostAsJsonAsync("/api/products", product1);
+
+        // 2. ACT - Tenta criar de novo
+        var response = await _client.PostAsJsonAsync("/api/products", product1);
+    
+        // 3. ASSERT
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    
+        var content = await response.Content.ReadAsStringAsync();
+    
+        Assert.Contains("Já existe um registro", content, StringComparison.InvariantCultureIgnoreCase);
+    }
 }

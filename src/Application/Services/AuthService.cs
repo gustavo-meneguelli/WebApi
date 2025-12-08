@@ -4,6 +4,7 @@ using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Security;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 
@@ -18,14 +19,14 @@ public class AuthService(IUserRepository userRepository, IPasswordHash passwordH
 
         if (user is null)
         {
-            return Result<string>.Unauthorized("User or password is invalid");
+            return Result<string>.Unauthorized(string.Format(ErrorMessages.CredentialsInvalid));
         }
 
         var passwordIsValid = passwordHash.VerifyHashedPassword(dto.Password, user.PasswordHash);
 
         if (!passwordIsValid)
         {
-            return Result<string>.Unauthorized("User or password is invalid");
+            return Result<string>.Unauthorized(string.Format(ErrorMessages.CredentialsInvalid));
         }
         
         var token = tokenService.GenerateToken(user);
@@ -39,7 +40,7 @@ public class AuthService(IUserRepository userRepository, IPasswordHash passwordH
 
         if (userExists is not null)
         {
-            return Result<string>.Duplicate("User already exists");
+            return Result<string>.Duplicate(string.Format(ErrorMessages.AlreadyExists, "usuário", "username"));
         }
         
         var user = new User
