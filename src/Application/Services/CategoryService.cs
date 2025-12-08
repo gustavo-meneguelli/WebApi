@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.DTO.Categories;
+using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
@@ -7,7 +8,7 @@ using Domain.Entities;
 
 namespace Application.Services;
 
-public class CategoryService(ICategoryRepository repository, IMapper mapper) : ICategoryService
+public class CategoryService(ICategoryRepository repository, IMapper mapper, IUnitOfWork unitOfWork) : ICategoryService
 {
     public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync()
     {
@@ -45,6 +46,8 @@ public class CategoryService(ICategoryRepository repository, IMapper mapper) : I
         var category = mapper.Map<Category>(dto);
         
         await repository.AddAsync(category);
+
+        await unitOfWork.CommitAsync();
         
         var responseDto = mapper.Map<CategoryResponseDto>(category);
         

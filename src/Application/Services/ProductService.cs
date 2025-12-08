@@ -1,20 +1,26 @@
 using Application.Common.Models;
 using Application.DTO.Products;
+using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
 public class ProductService(
     IProductRepository productRepository,
     ICategoryRepository categoryRepository,
-    IMapper mapper) : IProductService
+    IMapper mapper,
+    IUnitOfWork unitOfWork) : IProductService
 {
     public async Task<Result<PagedResult<ProductResponseDto>>> GetAllAsync(PaginationParams pagination)
     {
-        var pagedResult = await productRepository.GetAllAsync(pagination);
+        var pagedResult = await productRepository.GetAllAsync(
+            pagination,
+            filter: null,
+            include: query => query.Include(p => p.Category)!);
 
         var listProductResponseDtos = mapper.Map<IEnumerable<ProductResponseDto>>(pagedResult.Items);
 
@@ -64,10 +70,12 @@ public class ProductService(
         var product = mapper.Map<Product>(dto);
 
         await productRepository.AddAsync(product);
+        
+        await unitOfWork.CommitAsync();
 
-        var productReponseDto = mapper.Map<Product, ProductResponseDto>(product);
+        var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
 
-        return Result<ProductResponseDto>.Created(productReponseDto);
+        return Result<ProductResponseDto>.Created(productResponseDto);
     }
 
     public async Task<Result<ProductResponseDto?>> UpdateAsync(int id, UpdateProductDto dto)
@@ -106,6 +114,8 @@ public class ProductService(
         mapper.Map(dto, product);
 
         await productRepository.UpdateAsync(product);
+        
+        await unitOfWork.CommitAsync();
 
         var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
 

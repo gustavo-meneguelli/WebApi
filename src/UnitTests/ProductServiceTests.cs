@@ -1,4 +1,5 @@
 using Application.DTO.Products;
+using Application.Interfaces.Generics;
 using Moq;
 using Application.Services;
 using Application.Interfaces.Repositories;
@@ -20,6 +21,7 @@ public class ProductServiceTests
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
         var mapper = configuration.CreateMapper();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
 
         var model = new Product 
         { 
@@ -33,7 +35,7 @@ public class ProductServiceTests
             .Setup(repo => repo.GetByIdAsync(1))
             .ReturnsAsync(model);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
 
         // ACT
         var result = await service.GetByIdAsync(1);
@@ -51,12 +53,14 @@ public class ProductServiceTests
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var mapperMock = new Mock<IMapper>();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
+
 
         productRepositoryMock
             .Setup(repo => repo.GetByIdAsync(99))
             .ReturnsAsync((Product?)null); 
 
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object, unitToWorkMock.Object);
 
         // ACT
         var result = await service.GetByIdAsync(99);
@@ -74,6 +78,7 @@ public class ProductServiceTests
         var productRepositoryMock = new Mock<IProductRepository>();
         var categoryRepositoryMock = new Mock<ICategoryRepository>();
         var mapperMock = new Mock<IMapper>();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
         
         var model = new Product 
         { 
@@ -91,7 +96,7 @@ public class ProductServiceTests
             .Setup(repo => repo.ExistByNameAsync("Outro Teste"))
             .ReturnsAsync(true);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapperMock.Object, unitToWorkMock.Object);
 
         //ACT
         var fakeDto = new UpdateProductDto { Name = "Outro Teste",  Price = 10 };
@@ -113,8 +118,10 @@ public class ProductServiceTests
         {
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
-
         var mapper = configuration.CreateMapper();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
+
+        
         
         var model = new Product 
         { 
@@ -131,7 +138,7 @@ public class ProductServiceTests
             .Setup(repo => repo.ExistByNameAsync("Outro Teste"))
             .ReturnsAsync(false);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
         
         //ACT
         var fakeDto = new UpdateProductDto { Name = "Outro Teste",  Price = 10 };
@@ -154,6 +161,8 @@ public class ProductServiceTests
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
         var mapper = configuration.CreateMapper();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
+
 
         var model = new CreateProductDto
         {
@@ -166,7 +175,7 @@ public class ProductServiceTests
             .Setup(repo => repo.ExistByNameAsync(model.Name))
             .ReturnsAsync(true);
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
         
         //ACT
         var result = await service.AddAsync(model);
@@ -187,6 +196,7 @@ public class ProductServiceTests
             cfg.AddProfile(new Application.Mappings.MappingProfile());
         });
         var mapper = mapperMock.CreateMapper();
+        var unitToWorkMock = new Mock<IUnitOfWork>();
 
         var model = new CreateProductDto()
         {
@@ -203,7 +213,7 @@ public class ProductServiceTests
             .Setup(repo => repo.GetByIdAsync(1))
             .ReturnsAsync(new Category { Id = 1, Name = "Categoria Teste" });
         
-        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper);
+        var service = new ProductService(productRepositoryMock.Object, categoryRepositoryMock.Object, mapper, unitToWorkMock.Object);
         
         //ACT
         var result = await service.AddAsync(model);

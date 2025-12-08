@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.DTO.Auth;
+using Application.Interfaces.Generics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Security;
 using Application.Interfaces.Services;
@@ -8,7 +9,7 @@ using Domain.Enums;
 
 namespace Application.Services;
 
-public class AuthService(IUserRepository userRepository, IPasswordHash passwordHash, ITokenService tokenService)
+public class AuthService(IUserRepository userRepository, IPasswordHash passwordHash, ITokenService tokenService, IUnitOfWork unitOfWork)
     : IAuthService
 {
     public async Task<Result<string>> LoginAsync(LoginDto dto)
@@ -45,6 +46,8 @@ public class AuthService(IUserRepository userRepository, IPasswordHash passwordH
             { Username = dto.Username, PasswordHash = passwordHash.HashPassword(dto.Password), Role = UserRole.Common};
         
         await userRepository.AddAsync(user);
+        
+        await unitOfWork.CommitAsync();
         
         return Result<string>.Success("User created with success");
     }

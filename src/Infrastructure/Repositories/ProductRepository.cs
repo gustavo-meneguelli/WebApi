@@ -11,30 +11,6 @@ public class ProductRepository(AppDbContext context) : Repository<Product>(conte
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<PagedResult<Product>> GetAllAsync(PaginationParams paginationParams)
-    {
-        var totalCount = await _context.Products.CountAsync();
-
-        var items = await _context.Products
-            .AsNoTracking()
-            .Include(p => p.Category)
-            .OrderBy(p => p.Id)
-            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
-            .Take(paginationParams.PageSize)
-            .ToListAsync();
-
-        var totalPages = (int)Math.Ceiling(totalCount / (double)paginationParams.PageSize);
-
-        return new PagedResult<Product>
-        {
-            Items = items,
-            CurrentPage = paginationParams.PageNumber,
-            PageSize = paginationParams.PageSize,
-            TotalCount = totalCount,
-            TotalPages = totalPages 
-        };
-    }
-
     public async Task<Product?> GetByNameAsync(string name)
     {
         return await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
