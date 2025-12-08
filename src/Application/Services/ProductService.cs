@@ -91,9 +91,8 @@ public class ProductService(
         }
 
         await productRepository.DeleteAsync(product);
+        await unitOfWork.CommitAsync();
 
-        var productResponseDto = mapper.Map<Product, ProductResponseDto>(product);
-
-        return Result<ProductResponseDto?>.Success(productResponseDto);
+        return Result<ProductResponseDto?>.NoContent();
     }
 }

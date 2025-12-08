@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.DTO.Categories;
 using Application.Interfaces.Services;
 using FluentValidation;
@@ -23,9 +24,9 @@ public class CategoriesController(
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
-        var result = await service.GetAllAsync();
+        var result = await service.GetAllAsync(paginationParams);
         
         return ParseResult(result);
     }

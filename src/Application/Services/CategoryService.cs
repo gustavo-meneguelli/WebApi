@@ -11,13 +11,22 @@ namespace Application.Services;
 
 public class CategoryService(ICategoryRepository repository, IMapper mapper, IUnitOfWork unitOfWork) : ICategoryService
 {
-    public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllAsync()
+    public async Task<Result<PagedResult<CategoryResponseDto>>> GetAllAsync(PaginationParams paginationParams)
     {
-        var categories = await repository.GetAllAsync();
+        var pagedCategories = await repository.GetAllAsync(paginationParams);
         
-        var response = mapper.Map<IEnumerable<CategoryResponseDto>>(categories);
+        var categoriesDto = mapper.Map<IEnumerable<CategoryResponseDto>>(pagedCategories.Items);
         
-        return Result<IEnumerable<CategoryResponseDto>>.Success(response);
+        var pagedResult = new PagedResult<CategoryResponseDto>
+        {
+            Items = categoriesDto,
+            CurrentPage = pagedCategories.CurrentPage,
+            PageSize = pagedCategories.PageSize,
+            TotalCount = pagedCategories.TotalCount,
+            TotalPages = pagedCategories.TotalPages
+        };
+        
+        return Result<PagedResult<CategoryResponseDto>>.Success(pagedResult);
     }
 
     public async Task<Result<CategoryResponseDto>> GetByIdAsync(int id)
