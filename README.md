@@ -1,73 +1,172 @@
 # Darklyn Tech Store API
 
-Este repositório contém a API Backend de um e-commerce de produtos tecnológicos.
+API REST para e-commerce de produtos tecnológicos, desenvolvida com .NET 10 e PostgreSQL.
 
-O objetivo principal deste projeto não é apenas criar um CRUD, mas sim aplicar Engenharia de Software e boas práticas de mercado, simulando um ambiente real de desenvolvimento corporativo utilizando o ecossistema .NET mais recente.
-
-Swagger (Live Demo): https://darklyn-api.onrender.com/swagger
-Front-end (Visual): https://github.com/gustavo-meneguelli/darklyn-tech-store-web
+**Demo:** https://darklyn-api.onrender.com/swagger
 
 ---
 
-## Tecnologias e Práticas
+## 🎯 Sobre
 
-O projeto foi construído focando em desacoplamento, testabilidade e performance.
+Projeto pessoal focado em aplicar boas práticas de desenvolvimento:
+- Clean Architecture
+- Autenticação JWT
+- Validações centralizadas
+- Testes automatizados
 
-- Framework: .NET 10 (C#)
-- Arquitetura: Clean Architecture (Domain, Application, Infrastructure, API)
-- Banco de Dados: PostgreSQL
-- ORM: Entity Framework Core (Code First)
-- Autenticação: JWT (JSON Web Token)
-- Validação: FluentValidation (Fail Fast Strategy)
-- Mapeamento: AutoMapper
-- Containerização: Docker & Docker Hub
-- Testes: xUnit (Unitários e de Integração)
+---
 
-## Estrutura do Projeto
+## 🛠️ Tech Stack
 
-A solução segue a separação de responsabilidades estrita:
+- **.NET 10** - Framework
+- **PostgreSQL** - Banco de dados
+- **Entity Framework Core** - ORM
+- **FluentValidation** - Validações
+- **AutoMapper** - Mapeamento de objetos
+- **JWT** - Autenticação
+- **Swagger** - Documentação
+- **xUnit** - Testes
 
-- Domain: Entidades, Enums e Regras de Negócio "Puras". Não depende de nenhuma outra camada.
-- Application: Casos de uso (Services), DTOs, Interfaces e Validações.
-- Infrastructure: Implementação de acesso a dados (Repositories), Contexto do Banco e Configurações externas.
-- Api: Controllers, Middlewares e Injeção de Dependência (IoC).
+---
 
-## Funcionalidades Principais
+## 📁 Estrutura do Projeto
 
-- Gestão de Produtos: CRUD completo com relacionamento de categorias.
-- Integridade de Dados: Restrições de chave estrangeira (Delete Restrict) para evitar registros órfãos.
-- Segurança: Hash de senhas e proteção de rotas via Role-based Authorization (Admin/User).
-- Auditoria: Implementação de Soft Delete e rastreamento de data de criação/edição.
+```
+src/
+├── Domain/          # Entidades e regras de negócio
+├── Application/     # Casos de uso e interfaces
+├── Infrastructure/  # Implementações (banco, repos)
+└── Api/            # Controllers e configuração
+```
 
-## Como Rodar Localmente
+Clean Architecture: dependências apontam sempre para o Domain (núcleo da aplicação).
 
-### Pré-requisitos
-- .NET SDK 10.0+
-- Docker (Recomendado para o Banco de Dados)
-- PostgreSQL
+---
 
-### Passo a passo
+## ✨ Funcionalidades
 
-1. Clone o repositório:
-   git clone https://github.com/gustavo-meneguelli/darklyn-tech-store-api.git
+**Produtos**
+- Listar com paginação
+- Criar, atualizar (parcial), deletar
+- Busca por ID
+- Soft delete (recuperável)
 
-2. Configure o Banco de Dados:
-   Atualize a string de conexão no appsettings.Development.json ou utilize o user-secrets para maior segurança.
+**Categorias**
+- CRUD completo com paginação
+- Proteção: não permite deletar se houver produtos vinculados
 
-3. Execute as Migrations:
-   dotnet ef database update
+**Autenticação**
+- Registro de usuários
+- Login com JWT
+- Autorização por roles (Admin/Common)
 
-4. Rode a API:
-   dotnet run --project src/Api
+---
 
-   O Swagger estará disponível em http://localhost:5000/swagger (ou na porta configurada).
+## 🔧 Decisões Técnicas
 
-## Testes
+**Soft Delete**  
+Registros não são removidos do banco, apenas marcados como deletados. Permite recuperação e auditoria.
 
-O projeto possui uma suíte de testes automatizados para garantir a estabilidade das regras de negócio e da integração.
+**Paginação**  
+Implementada em todas as listagens para escalabilidade e performance.
 
-Para executar os testes:
+**Validações Centralizadas**  
+FluentValidation com validações assíncronas (verificação de unicidade, existência de relacionamentos).
+
+**Update Parcial (PATCH)**  
+Campos vazios/nulos são ignorados, permite atualizar apenas o necessário.
+
+---
+
+## 🚀 Como Rodar
+
+**Pré-requisitos:**
+- .NET 10 SDK
+- PostgreSQL (ou Docker)
+
+**Setup:**
+```bash
+# Clone
+git clone https://github.com/gustavo-meneguelli/darklyn-tech-store-api.git
+
+# Configure connection string
+# Edite appsettings.json ou use variável DATABASE_URL
+
+# Aplique migrations
+dotnet ef database update
+
+# Execute
+dotnet run --project src/Api
+
+# Acesse Swagger
+http://localhost:5000/swagger
+```
+
+**Credenciais padrão:** admin / (senha em appsettings)
+
+---
+
+## 🧪 Testes
+
+```bash
 dotnet test
+# 17 testes (unitários + integração)
+```
+
+Cobertura: Validators, Services, Endpoints
 
 ---
-Desenvolvido por Gustavo Meneguelli.
+
+## 🔐 Variáveis de Ambiente
+
+Para produção:
+```
+DATABASE_URL=postgresql://...
+JwtSettings__SecretKey=sua-chave-256-bits
+AdminSettings__Password=senha-admin
+```
+
+---
+
+## 📚 Conceitos Aplicados
+
+- Clean Architecture (isolamento de camadas)
+- Repository Pattern (abstração de dados)
+- Unit of Work (transações)
+- Result Pattern (tratamento de erros)
+- Dependency Injection (inversão de controle)
+- JWT Bearer Authentication
+- Soft Delete Pattern
+- Eager Loading (otimização N+1)
+
+---
+
+## 🚧 Em Desenvolvimento
+
+Próximas features planejadas:
+- [ ] Cache com Redis
+- [ ] Rate limiting
+- [ ] Upload de imagens de produtos
+- [ ] Filtros avançados (preço, categoria)
+- [ ] Webhooks para integrações
+
+---
+
+## 📖 Documentação
+
+Swagger/OpenAPI disponível em `/swagger` com:
+- Descrição de todos endpoints
+- Modelos de request/response
+- Códigos de status HTTP
+- Testes interativos
+
+---
+
+## 📄 Licença
+
+MIT License - Livre para uso educacional e referência.
+
+---
+
+**Desenvolvido por Gustavo Meneguelli**  
+[LinkedIn](#) | [Portfolio](#)
