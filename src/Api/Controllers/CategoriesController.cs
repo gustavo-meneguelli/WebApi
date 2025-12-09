@@ -12,7 +12,8 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController(
     ICategoryService service,
-    IValidator<CreateCategoryDto> validator)
+    IValidator<CreateCategoryDto> createValidator,
+    IValidator<UpdateCategoryDto> updateValidator)
     : MainController
 {
     /// <summary>
@@ -73,12 +74,77 @@ public class CategoriesController(
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateCategoryDto dto)
     {
-        var validationResult = await validator.ValidateAsync(dto);
+        var validationResult = await createValidator.ValidateAsync(dto);
         var validationResponse = CustomResponse(validationResult);
         if (validationResponse is not null) return validationResponse;
         
         var result = await service.AddAsync(dto);
         
+        return ParseResult(result);
+    }
+    
+    /// <summary>
+    /// Atualiza os dados de uma categoria existente.
+    /// </summary>
+    /// <remarks>
+    /// Requer permissão de **Admin**.
+    /// 
+    /// **Update Parcial:** Campos vazios são ignorados (não serão atualizados).
+    /// </remarks>
+    /// <param name="id">ID da categoria a ser atualizada.</param>
+    /// <param name="dto">Novo nome da categoria.</param>
+    /// <returns>A categoria atualizada.</returns>
+    /// <response code="200">Categoria atualizada com sucesso.</response>
+    /// <response code="400">Dados inválidos fornecidos.</response>
+    /// <response code="404">Categoria não encontrada.</response>
+    /// <response code="409">Já existe outra categoria com este nome.</response>
+    /// <response code="401">Usuário não autenticado.</response>
+    /// <response code="403">Acesso negado (apenas Admins).</response>
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateCategoryDto dto)
+    {
+        var validationResult = await updateValidator.ValidateAsync(dto);
+        var validationResponse = CustomResponse(validationResult);
+        if (validationResponse is not null) return validationResponse;
+        
+        var result = await service.UpdateAsync(id, dto);
+
+        return ParseResult(result);
+    }
+
+    /// <summary>
+    /// Remove uma categoria do sistema.
+    /// </summary>
+    /// <remarks>
+    /// Requer permissão de **Admin**.
+    /// 
+    /// **Atenção:** Não é possível deletar categoria que possui produtos vinculados 
+    /// (proteção de integridade referencial).
+    /// </remarks>
+    /// <param name="id">ID da categoria a ser removida.</param>
+    /// <response code="204">Categoria removida com sucesso.</response>
+    /// <response code="400">Categoria possui produtos vinculados.</response>
+    /// <response code="404">Categoria não encontrada.</response>
+    /// <response code="401">Usuário não autenticado.</response>
+    /// <response code="403">Acesso negado (apenas Admins).</response>
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeleteAsync(int id)
+    {
+        var result = await service.DeleteAsync(id);
+
         return ParseResult(result);
     }
 }

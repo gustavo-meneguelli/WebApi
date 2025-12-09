@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Application.Interfaces;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +33,6 @@ public class TokenService(IConfiguration configuration) : ITokenService
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddHours(int.TryParse(configuration["JwtSettings:ExpirationHours"], out var hours) ? hours : 8),
             SigningCredentials = credentials,
-            
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

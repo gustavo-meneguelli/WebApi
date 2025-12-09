@@ -39,6 +39,7 @@ public static class AppServiceExtension
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<DbSeeder>();
+        services.AddScoped<DevelopmentSeeder>();
 
         return services;
     }
@@ -127,8 +128,16 @@ public static class AppServiceExtension
                 await dbContext.Database.MigrateAsync(); 
             }
             
+            // Seed de produção (sempre roda)
             var seeder = services.GetRequiredService<DbSeeder>();
             await seeder.SeedAsync();
+            
+            // Seed de desenvolvimento (APENAS em ambiente Development)
+            if (app.Environment.IsDevelopment())
+            {
+                var devSeeder = services.GetRequiredService<DevelopmentSeeder>();
+                await devSeeder.SeedAsync();
+            }
         }
         catch (Exception ex)
         {

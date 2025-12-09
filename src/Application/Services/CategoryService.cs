@@ -55,4 +55,40 @@ public class CategoryService(ICategoryRepository repository, IMapper mapper, IUn
         
         return Result<CategoryResponseDto>.Created(responseDto);
     }
+
+    public async Task<Result<CategoryResponseDto?>> UpdateAsync(int id, UpdateCategoryDto dto)
+    {
+        var category = await repository.GetByIdAsync(id);
+
+        if (category is null)
+        {
+            return Result<CategoryResponseDto?>.NotFound(
+                string.Format(ErrorMessages.NotFound, "Categoria"));
+        }
+
+        // Mapper atualiza apenas campos informados (update parcial)
+        mapper.Map(dto, category);
+        await repository.UpdateAsync(category);
+        await unitOfWork.CommitAsync();
+
+        var categoryResponseDto = mapper.Map<CategoryResponseDto>(category);
+        return Result<CategoryResponseDto?>.Success(categoryResponseDto);
+    }
+
+    public async Task<Result<CategoryResponseDto?>> DeleteAsync(int id)
+    {
+        var category = await repository.GetByIdAsync(id);
+
+        if (category is null)
+        {
+            return Result<CategoryResponseDto?>.NotFound(
+                string.Format(ErrorMessages.NotFound, "Categoria"));
+        }
+
+        await repository.DeleteAsync(category);
+        await unitOfWork.CommitAsync();
+
+        // DELETE retorna 204 NoContent conforme padrão REST
+        return Result<CategoryResponseDto?>.NoContent();
+    }
 }

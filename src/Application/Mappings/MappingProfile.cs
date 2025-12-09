@@ -19,6 +19,11 @@ public class MappingProfile : Profile
         
         CreateMap<Product, ProductResponseDto>();
         CreateMap<CreateCategoryDto, Category>();
+        
+        // Suporta update parcial: só mapeia campos diferentes dos valores default
+        CreateMap<UpdateCategoryDto, Category>()
+            .ForMember(dest => dest.Name, opt => opt.Condition(src => src.Name != string.Empty));
+        
         CreateMap<Category, CategoryResponseDto>();
     }
 }
