@@ -1,16 +1,18 @@
-using Application.Interfaces.Generics;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Security;
-using Application.Interfaces.Services;
-using Application.Services;
+using Application.Common.Interfaces;
+using Application.Features.Auth.Repositories;
+using Application.Features.Auth.Services;
+using Application.Features.Categories.Repositories;
+using Application.Features.Categories.Services;
+using Application.Features.Products.Repositories;
+using Application.Features.Products.Services;
 using Infrastructure.Data;
 using Infrastructure.Generics;
 using Infrastructure.Repositories;
-using Infrastructure.Services;
+using Infrastructure.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;  
+using Microsoft.OpenApi.Models;
 
 namespace Api.Extensions;
 
@@ -19,9 +21,9 @@ public static class AppServiceExtension
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
     {
         // Suporta appsettings local e variável de ambiente (Railway/Heroku)
-        var connectionString = config.GetConnectionString("DefaultConnection") 
+        var connectionString = config.GetConnectionString("DefaultConnection")
                                ?? config["DATABASE_URL"];
-        
+
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException("Connection string not found. Checked 'DefaultConnection' and 'DATABASE_URL'.");
@@ -57,7 +59,7 @@ public static class AppServiceExtension
                 In = ParameterLocation.Header,
                 Description = "Insira o token JWT desta maneira: Bearer {seu token}"
             });
-            
+
             var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             c.IncludeXmlComments(xmlPath);
@@ -115,7 +117,7 @@ public static class AppServiceExtension
     public static async Task UseDbSeeder(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        
+
         var services = scope.ServiceProvider;
 
         try
@@ -125,13 +127,13 @@ public static class AppServiceExtension
             // Aplica migrations automaticamente no startup
             if (dbContext.Database.IsRelational())
             {
-                await dbContext.Database.MigrateAsync(); 
+                await dbContext.Database.MigrateAsync();
             }
-            
+
             // Seed de produção (sempre roda)
             var seeder = services.GetRequiredService<DbSeeder>();
             await seeder.SeedAsync();
-            
+
             // Seed de desenvolvimento (APENAS em ambiente Development)
             if (app.Environment.IsDevelopment())
             {
@@ -144,10 +146,10 @@ public static class AppServiceExtension
             app.Logger.LogError(ex, "An error occurred seeding the DB.");
         }
     }
-    
+
     public static IServiceCollection AddCorsConfig(this IServiceCollection services, IConfiguration config)
     {
-        var allowedOrigin = config["CorsSettings:AllowedOrigins"] 
+        var allowedOrigin = config["CorsSettings:AllowedOrigins"]
                             ?? throw new InvalidOperationException("CorsSettings:AllowedOrigins is missing in appsettings.");
 
         services.AddCors(options =>

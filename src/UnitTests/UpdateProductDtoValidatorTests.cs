@@ -1,6 +1,8 @@
-using Application.DTO.Products;
-using Application.Interfaces.Repositories;
-using Application.Validators;
+using Application.Features.Products.DTOs;
+using Application.Features.Products.Repositories;
+using Application.Features.Categories.Repositories;
+using Application.Common.Interfaces;
+using Application.Features.Products.Validators;
 using Domain.Entities;
 using Moq;
 
@@ -24,11 +26,11 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
-            Name = "Produto Duplicado", 
-            Price = 100, 
-            CategoryId = 1 
+        var dto = new UpdateProductDto
+        {
+            Name = "Produto Duplicado",
+            Price = 100,
+            CategoryId = 1
         };
 
         // ACT
@@ -61,11 +63,11 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
-            Name = "Produto Novo", 
-            Price = 100, 
-            CategoryId = 1 
+        var dto = new UpdateProductDto
+        {
+            Name = "Produto Novo",
+            Price = 100,
+            CategoryId = 1
         };
 
         // ACT
@@ -97,11 +99,11 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
-            Name = "Produto Teste", 
-            Price = 100, 
-            CategoryId = 999 
+        var dto = new UpdateProductDto
+        {
+            Name = "Produto Teste",
+            Price = 100,
+            CategoryId = 999
         };
 
         // ACT
@@ -124,10 +126,10 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
+        var dto = new UpdateProductDto
+        {
             Name = string.Empty,  // Não quer atualizar o nome
-            Price = 100, 
+            Price = 100,
             CategoryId = 0  // Não quer atualizar a categoria
         };
 
@@ -136,10 +138,10 @@ public class UpdateProductDtoValidatorTests
 
         // ASSERT
         Assert.True(result.IsValid); // Deve passar pois campos vazios não são validados
-        
+
         // Verifica que ExistByNameAsync NÃO foi chamado (validação condicional .When())
         productRepositoryMock.Verify(
-            repo => repo.ExistByNameAsync(It.IsAny<string>()), 
+            repo => repo.ExistByNameAsync(It.IsAny<string>()),
             Times.Never);
     }
 
@@ -154,11 +156,11 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
-            Name = string.Empty, 
+        var dto = new UpdateProductDto
+        {
+            Name = string.Empty,
             Price = -10,  // Preço negativo - inválido
-            CategoryId = 0 
+            CategoryId = 0
         };
 
         // ACT
@@ -181,11 +183,11 @@ public class UpdateProductDtoValidatorTests
             productRepositoryMock.Object,
             categoryRepositoryMock.Object);
 
-        var dto = new UpdateProductDto 
-        { 
-            Name = string.Empty, 
+        var dto = new UpdateProductDto
+        {
+            Name = string.Empty,
             Price = 150000,  // Preço acima do limite (100.000)
-            CategoryId = 0 
+            CategoryId = 0
         };
 
         // ACT
@@ -197,3 +199,4 @@ public class UpdateProductDtoValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("100.000"));
     }
 }
+

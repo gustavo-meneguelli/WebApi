@@ -1,6 +1,6 @@
 using Application.Common.Models;
-using Application.DTO.Products;
-using Application.Interfaces.Services;
+using Application.Features.Products.DTOs;
+using Application.Features.Products.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +30,7 @@ public class ProductsController(
     public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
         var result = await service.GetAllAsync(paginationParams);
-        
+
         return ParseResult(result);
     }
 
@@ -58,7 +58,7 @@ public class ProductsController(
     /// <remarks>
     /// Requer permissão de **Admin**.
     /// </remarks>
-    /// <param name="dto">Dados do produto a ser criado.</param>
+    /// <param name="product">Dados do produto a ser criado.</param>
     /// <returns>Retorna o produto recém-criado.</returns>
     /// <response code="201">Produto criado com sucesso.</response>
     /// <response code="400">Dados inválidos (ex: Preço negativo, Nome curto).</response>
@@ -72,14 +72,14 @@ public class ProductsController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> AddAsync(CreateProductDto dto)
+    public async Task<IActionResult> AddAsync(CreateProductDto product)
     {
-        var validationResult = await createValidator.ValidateAsync(dto);
-        
-        var validationResponse = CustomResponse(validationResult);
-        if (validationResponse is not null) return validationResponse;
-        
-        var result = await service.AddAsync(dto);
+        var validationResult = await createValidator.ValidateAsync(product);
+
+        var errorResponse = CustomResponse(validationResult);
+        if (errorResponse is not null) return errorResponse;
+
+        var result = await service.AddAsync(product);
 
         return ParseResult(result);
     }
@@ -94,7 +94,7 @@ public class ProductsController(
     /// A atualização valida se o novo nome já existe em outro produto para evitar duplicatas.
     /// </remarks>
     /// <param name="id">ID do produto a ser atualizado.</param>
-    /// <param name="dto">Novos dados do produto (Nome e/ou Preço).</param>
+    /// <param name="updates">Novos dados do produto (Nome e/ou Preço).</param>
     /// <returns>O produto atualizado.</returns>
     /// <response code="200">Produto atualizado com sucesso.</response>
     /// <response code="400">Dados inválidos fornecidos.</response>
@@ -110,13 +110,13 @@ public class ProductsController(
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateProductDto dto)
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateProductDto updates)
     {
-        var validationResult = await updateValidator.ValidateAsync(dto);
-        var validationResponse = CustomResponse(validationResult);
-        if (validationResponse is not null) return validationResponse;
-        
-        var result = await service.UpdateAsync(id, dto);
+        var validationResult = await updateValidator.ValidateAsync(updates);
+        var errorResponse = CustomResponse(validationResult);
+        if (errorResponse is not null) return errorResponse;
+
+        var result = await service.UpdateAsync(id, updates);
 
         return ParseResult(result);
     }

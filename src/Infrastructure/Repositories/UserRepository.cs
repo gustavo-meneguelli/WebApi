@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+using Application.Features.Auth.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Generics;

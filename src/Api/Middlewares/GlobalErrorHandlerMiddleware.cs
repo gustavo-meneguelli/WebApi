@@ -1,7 +1,7 @@
 namespace Api.Middlewares;
 
 public class GlobalErrorHandlerMiddleware(
-    RequestDelegate next, 
+    RequestDelegate next,
     ILogger<GlobalErrorHandlerMiddleware> logger,
     IWebHostEnvironment environment)
 {

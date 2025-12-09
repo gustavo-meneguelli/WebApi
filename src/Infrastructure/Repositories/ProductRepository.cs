@@ -1,5 +1,4 @@
-using Application.Common.Models;
-using Application.Interfaces.Repositories;
+using Application.Features.Products.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Generics;
@@ -20,7 +19,7 @@ public class ProductRepository(AppDbContext context) : Repository<Product>(conte
     {
         return await _context.Products.AnyAsync(p => p.Name == name);
     }
-    
+
     public override async Task<Product?> GetByIdAsync(int id)
     {
         return await _context.Products

@@ -1,5 +1,5 @@
-using Api.Extensions; 
-using Application.Validators;
+using Api.Extensions;
+using Application.Features.Products.Validators;
 using FluentValidation;
 using Serilog;
 
@@ -11,7 +11,7 @@ builder.Host.UseSerilog((context, configuration) =>
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext()
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-        .WriteTo.File("logs/api-log-.txt", 
+        .WriteTo.File("logs/api-log-.txt",
             rollingInterval: RollingInterval.Day,
             outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
         .MinimumLevel.Information());
@@ -20,13 +20,13 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddApplicationServices(builder.Configuration); 
-builder.Services.AddSwaggerConfig();                            
-builder.Services.AddJwtConfig(builder.Configuration);           
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddSwaggerConfig();
+builder.Services.AddJwtConfig(builder.Configuration);
 
 // FluentValidation, AutoMapper
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
-builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
+builder.Services.AddAutoMapper(typeof(Application.Common.Mappings.MappingProfile));
 
 builder.Services.AddCorsConfig(builder.Configuration);
 
@@ -44,7 +44,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("WebUiPolicy");
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

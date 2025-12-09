@@ -1,5 +1,5 @@
-using Application.DTO.Auth;
-using Application.Interfaces.Security;
+using Application.Features.Auth.DTOs;
+using Application.Features.Auth.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +16,7 @@ public class AuthController(
     /// <summary>
     /// Realiza o login de um usuário existente.
     /// </summary>
-    /// <param name="dto">Objeto contendo nome de usuário e senha.</param>
+    /// <param name="credentials">Objeto contendo nome de usuário e senha.</param>
     /// <returns>Retorna um token JWT se as credenciais forem válidas.</returns>
     /// <response code="200">Login realizado com sucesso. Retorna o Token.</response>
     /// <response code="400">Dados inválidos (ex: campos vazios).</response>
@@ -25,13 +25,14 @@ public class AuthController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> LoginAsync(LoginDto credentials)
     {
-        var validationResult = await loginValidator.ValidateAsync(dto);
-        var validationResponse = CustomResponse(validationResult);
-        if (validationResponse is not null) return validationResponse;
-        
-        var result = await authService.LoginAsync(dto);
+        var validationResult = await loginValidator.ValidateAsync(credentials);
+
+        var errorResponse = CustomResponse(validationResult);
+        if (errorResponse is not null) return errorResponse;
+
+        var result = await authService.LoginAsync(credentials);
 
         return ParseResult(result);
     }
@@ -42,7 +43,7 @@ public class AuthController(
     /// <remarks>
     /// O usuário criado terá automaticamente o perfil de **Common**.
     /// </remarks>
-    /// <param name="dto">Dados para registro (Nome de usuário e Senha).</param>
+    /// <param name="request">Dados para registro (Nome de usuário e Senha).</param>
     /// <returns>Mensagem de sucesso.</returns>
     /// <response code="200">Usuário registrado com sucesso.</response>
     /// <response code="400">Dados inválidos (ex: senha vazia).</response>
@@ -51,14 +52,15 @@ public class AuthController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
+    public async Task<IActionResult> RegisterAsync(UserRegisterDto request)
     {
-        var validationResult = await registerValidator.ValidateAsync(dto);
-        var validationResponse = CustomResponse(validationResult);
-        if (validationResponse is not null) return validationResponse;
-        
-        var result = await authService.RegisterAsync(dto);
-        
+        var validationResult = await registerValidator.ValidateAsync(request);
+
+        var errorResponse = CustomResponse(validationResult);
+        if (errorResponse is not null) return errorResponse;
+
+        var result = await authService.RegisterAsync(request);
+
         return ParseResult(result);
     }
 }

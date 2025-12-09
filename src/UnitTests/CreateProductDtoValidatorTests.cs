@@ -1,6 +1,8 @@
-using Application.DTO.Products;
-using Application.Interfaces.Repositories;
-using Application.Validators;
+using Application.Features.Products.DTOs;
+using Application.Features.Products.Repositories;
+using Application.Features.Categories.Repositories;
+using Application.Common.Interfaces;
+using Application.Features.Products.Validators;
 using Domain.Entities;
 using FluentValidation.TestHelper;
 using Moq;
@@ -17,7 +19,7 @@ public class CreateProductDtoValidatorTests
     {
         _productRepositoryMock = new Mock<IProductRepository>();
         _categoryRepositoryMock = new Mock<ICategoryRepository>();
-        
+
         _validator = new CreateProductDtoValidator(_productRepositoryMock.Object, _categoryRepositoryMock.Object);
     }
 
@@ -51,13 +53,13 @@ public class CreateProductDtoValidatorTests
         result.ShouldHaveValidationErrorFor(product => product.Name)
               .WithErrorMessage("Já existe um registro de produto com este nome.");
     }
-    
+
     [Fact]
     public async Task Validate_ShouldReturnError_WhenCategoryDoesNotExist()
     {
         // ARRANGE
         _productRepositoryMock.Setup(x => x.ExistByNameAsync(It.IsAny<string>())).ReturnsAsync(false);
-        
+
         _categoryRepositoryMock
             .Setup(repo => repo.GetByIdAsync(99))
             .ReturnsAsync((Category?)null);
@@ -85,10 +87,10 @@ public class CreateProductDtoValidatorTests
             .ReturnsAsync(new Category { Id = 1, Name = "Tech" }); // Existe
 
         var model = new CreateProductDto { Name = "Novo Produto", Price = 10, CategoryId = 1 };
-        
+
         // ACT
         var result = await _validator.TestValidateAsync(model);
-        
+
         // ASSERT
         result.ShouldNotHaveAnyValidationErrors();
     }

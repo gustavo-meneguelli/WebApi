@@ -16,18 +16,18 @@ public abstract class MainController : ControllerBase
         return result.TypeResult switch
         {
             TypeResult.Success => Ok(result.Data),
-            
+
             TypeResult.Created => Created(string.Empty, result.Data),
-            
+
             TypeResult.NotFound => NotFound(new { message = result.Message }),
             TypeResult.Duplicated => Conflict(new { message = result.Message }),
             TypeResult.Unauthorized => Unauthorized(new { message = result.Message }),
             TypeResult.NoContent => NoContent(),
-            
+
             _ => BadRequest(new { message = result.Message })
         };
     }
-    
+
     protected IActionResult? CustomResponse(ValidationResult validationResult)
     {
         // Se estiver válido, retorna null (para o controller saber que pode seguir)

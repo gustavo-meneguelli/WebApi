@@ -1,6 +1,5 @@
-using Application.Interfaces.Generics;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Security;
+using Application.Common.Interfaces;
+using Application.Features.Auth.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Configuration;
@@ -18,14 +17,14 @@ public class DbSeeder(IUserRepository userRepository, IPasswordHash passwordHash
         {
             var password = configuration["AdminSettings:Password"]
                 ?? throw new InvalidOperationException("AdminSettings:Password is null");
-            
+
             var user = new User()
             {
                 Username = "admin",
                 Role = UserRole.Admin,
                 PasswordHash = passwordHash.HashPassword(password)
             };
-            
+
             await userRepository.AddAsync(user);
             await unitOfWork.CommitAsync();
         }

@@ -1,6 +1,6 @@
 using Application.Common.Models;
-using Application.DTO.Categories;
-using Application.Interfaces.Services;
+using Application.Features.Categories.DTOs;
+using Application.Features.Categories.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +29,10 @@ public class CategoriesController(
     public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
         var result = await service.GetAllAsync(paginationParams);
-        
+
         return ParseResult(result);
     }
-    
+
     /// <summary>
     /// Busca uma categoria específica pelo ID.
     /// </summary>
@@ -58,7 +58,7 @@ public class CategoriesController(
     /// <remarks>
     /// Requer permissão de **Admin**.
     /// </remarks>
-    /// <param name="dto">Dados da nova categoria (Nome).</param>
+    /// <param name="category">Dados da nova categoria (Nome).</param>
     /// <returns>A categoria recém-criada.</returns>
     /// <response code="201">Categoria criada com sucesso.</response>
     /// <response code="400">Dados inválidos (ex: Nome vazio ou curto demais).</response>
@@ -72,17 +72,17 @@ public class CategoriesController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateCategoryDto dto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateCategoryDto category)
     {
-        var validationResult = await createValidator.ValidateAsync(dto);
+        var validationResult = await createValidator.ValidateAsync(category);
         var validationResponse = CustomResponse(validationResult);
         if (validationResponse is not null) return validationResponse;
-        
-        var result = await service.AddAsync(dto);
-        
+
+        var result = await service.AddAsync(category);
+
         return ParseResult(result);
     }
-    
+
     /// <summary>
     /// Atualiza os dados de uma categoria existente.
     /// </summary>
@@ -92,7 +92,7 @@ public class CategoriesController(
     /// **Update Parcial:** Campos vazios são ignorados (não serão atualizados).
     /// </remarks>
     /// <param name="id">ID da categoria a ser atualizada.</param>
-    /// <param name="dto">Novo nome da categoria.</param>
+    /// <param name="updates">Novos dados da categoria.</param>
     /// <returns>A categoria atualizada.</returns>
     /// <response code="200">Categoria atualizada com sucesso.</response>
     /// <response code="400">Dados inválidos fornecidos.</response>
@@ -108,13 +108,13 @@ public class CategoriesController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateCategoryDto dto)
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateCategoryDto updates)
     {
-        var validationResult = await updateValidator.ValidateAsync(dto);
-        var validationResponse = CustomResponse(validationResult);
-        if (validationResponse is not null) return validationResponse;
-        
-        var result = await service.UpdateAsync(id, dto);
+        var validationResult = await updateValidator.ValidateAsync(updates);
+        var errorResponse = CustomResponse(validationResult);
+        if (errorResponse is not null) return errorResponse;
+
+        var result = await service.UpdateAsync(id, updates);
 
         return ParseResult(result);
     }

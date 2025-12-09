@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Application.Common.Models;
-using Application.Interfaces.Generics;
+using Application.Common.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -17,7 +17,7 @@ public class Repository<T>(AppDbContext context) : IRepository<T> where T : clas
     public async Task<T> AddAsync(T entity)
     {
         await context.Set<T>().AddAsync(entity);
-        
+
         return entity;
     }
 

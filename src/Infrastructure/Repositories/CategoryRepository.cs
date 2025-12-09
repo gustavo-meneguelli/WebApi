@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+using Application.Features.Categories.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Generics;
@@ -23,3 +23,4 @@ public class CategoryRepository(AppDbContext context) : Repository<Category>(con
         return await _context.Categories.AnyAsync(c => c.Name == name);
     }
 }
+

@@ -1,5 +1,6 @@
-using Application.Interfaces.Generics;
-using Application.Interfaces.Repositories;
+using Application.Common.Interfaces;
+using Application.Features.Products.Repositories;
+using Application.Features.Categories.Repositories;
 using Domain.Entities;
 
 namespace Infrastructure.Data;
@@ -27,7 +28,7 @@ public class DevelopmentSeeder(
         await categoryRepository.AddAsync(perifericos);
         await categoryRepository.AddAsync(componentes);
         await categoryRepository.AddAsync(acessorios);
-        
+
         await unitOfWork.CommitAsync();
 
         // Criar 20 Produtos realistas
@@ -68,7 +69,8 @@ public class DevelopmentSeeder(
         {
             await productRepository.AddAsync(product);
         }
-        
+
         await unitOfWork.CommitAsync();
     }
 }
+

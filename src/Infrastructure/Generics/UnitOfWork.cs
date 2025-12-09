@@ -1,4 +1,4 @@
-using Application.Interfaces.Generics;
+using Application.Common.Interfaces;
 using Infrastructure.Data;
 
 namespace Infrastructure.Generics;
