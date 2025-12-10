@@ -1,8 +1,12 @@
 using Application.Common.Interfaces;
 using Application.Features.Auth.Repositories;
 using Application.Features.Auth.Services;
+using Application.Features.Carts.Repositories;
+using Application.Features.Carts.Services;
 using Application.Features.Categories.Repositories;
 using Application.Features.Categories.Services;
+using Application.Features.Orders.Repositories;
+using Application.Features.Orders.Services;
 using Application.Features.Products.Repositories;
 using Application.Features.Products.Services;
 using Infrastructure.Data;
@@ -36,6 +40,10 @@ public static class AppServiceExtension
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ICartRepository, CartRepository>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPasswordHash, PasswordHash>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserRepository, UserRepository>();

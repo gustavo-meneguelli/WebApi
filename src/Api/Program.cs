@@ -49,6 +49,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Health Check endpoint para Docker/Kubernetes
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+    .WithTags("Health")
+    .AllowAnonymous();
+
 //Check Seeder
 await app.UseDbSeeder();
 
