@@ -43,11 +43,11 @@ var app = builder.Build();
 
 app.UseMiddleware<Api.Middlewares.GlobalErrorHandlerMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseMiddleware<Api.Middlewares.GlobalErrorHandlerMiddleware>();
+
+// Enable Swagger in ALL environments (including Production/Render)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

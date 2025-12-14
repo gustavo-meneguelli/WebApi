@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 namespace Infrastructure.Extensions;
 
@@ -24,16 +25,7 @@ public static class InfrastructureServiceRegistration
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Database
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
-                             ?? configuration["DATABASE_URL"];
-
-        // Em ambiente de teste, a connection string pode não estar presente imediatamente ou será substituída.
-        // Não lançamos exceção aqui para permitir que o WebApplicationFactory funcione (ele substitui o DbContext depois).
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            connectionString = "Host=localhost;Database=DarklynStore;Username=postgres;Password=postgres";
-        }
-
+        var connectionString = GetConnectionString(configuration);
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
         // Repositories
@@ -72,7 +64,6 @@ public static class InfrastructureServiceRegistration
                 var keyBytes = System.Text.Encoding.UTF8.GetBytes(secretKey);
                 var key = new SymmetricSecurityKey(keyBytes);
 
-                // TODO: Em produção, deve ser true
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -93,5 +84,66 @@ public static class InfrastructureServiceRegistration
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer();
+    }
+
+    private static string GetConnectionString(IConfiguration configuration)
+    {
+        // 1. Try to get generic ConnectionString (Render pushes DATABASE_URL)
+        var connectionString = configuration["DATABASE_URL"];
+
+        // 2. If present, it might be a URI (postgres://) or a standard string.
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            return BuildConnectionStringFromUrl(connectionString);
+        }
+
+        // 3. Fallback to appsettings.json (Local Development)
+        // We strictly avoid "Data Source" here to prevent SQLite confusion in Production if DATABASE_URL is missing
+        var defaultConn = configuration.GetConnectionString("DefaultConnection");
+        if (!string.IsNullOrWhiteSpace(defaultConn) && !defaultConn.Contains("Data Source="))
+        {
+            return defaultConn;
+        }
+
+        // 4. Ultimate Fallback (Local Docker/Dev)
+        return "Host=localhost;Database=DarklynStore;Username=postgres;Password=postgres";
+    }
+
+    private static string BuildConnectionStringFromUrl(string url)
+    {
+        // Check if it's already a clean connection string (Key=Value) or a URI
+        if (!url.StartsWith("postgres://") && !url.StartsWith("postgresql://"))
+        {
+            return url;
+        }
+
+        try 
+        {
+            var uri = new Uri(url);
+            var userInfo = uri.UserInfo;
+            var database = uri.AbsolutePath.TrimStart('/');
+            
+            var builder = new NpgsqlConnectionStringBuilder
+            {
+                Host = uri.Host,
+                Port = uri.Port > 0 ? uri.Port : 5432,
+                Database = database,
+                SslMode = SslMode.Prefer
+            };
+
+            if (!string.IsNullOrEmpty(userInfo))
+            {
+                var parts = userInfo.Split(':', 2);
+                if (parts.Length > 0) builder.Username = parts[0];
+                if (parts.Length > 1) builder.Password = parts[1];
+            }
+
+            return builder.ToString();
+        }
+        catch
+        {
+            // If parsing fails, return original and let Npgsql throw the specific error
+            return url;
+        }
     }
 }
