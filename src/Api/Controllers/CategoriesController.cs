@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Features.Categories.DTOs;
 using Application.Features.Categories.Services;
 using FluentValidation;
+using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -65,7 +66,7 @@ public class CategoriesController(
     /// <response code="409">Já existe uma categoria com este nome.</response>
     /// <response code="401">Usuário não autenticado.</response>
     /// <response code="403">Acesso negado (apenas Admins podem criar).</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -100,7 +101,7 @@ public class CategoriesController(
     /// <response code="409">Já existe outra categoria com este nome.</response>
     /// <response code="401">Usuário não autenticado.</response>
     /// <response code="403">Acesso negado (apenas Admins).</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPatch("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -134,7 +135,7 @@ public class CategoriesController(
     /// <response code="404">Categoria não encontrada.</response>
     /// <response code="401">Usuário não autenticado.</response>
     /// <response code="403">Acesso negado (apenas Admins).</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

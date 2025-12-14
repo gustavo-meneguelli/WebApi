@@ -1,7 +1,7 @@
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Repositories;
 using Application.Features.Categories.Repositories;
-using Application.Common.Interfaces;
+
 using Application.Features.Products.Validators;
 using Domain.Entities;
 using Moq;
@@ -39,7 +39,7 @@ public class UpdateProductDtoValidatorTests
         // ASSERT
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Name");
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("Já existe"));
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("already exists"));
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class UpdateProductDtoValidatorTests
         // ASSERT
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "CategoryId");
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("não foi encontrado"));
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("not found"));
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class UpdateProductDtoValidatorTests
         // ASSERT
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Price");
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("maior que zero"));
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("greater than zero"));
     }
 
     [Fact]
@@ -196,7 +196,7 @@ public class UpdateProductDtoValidatorTests
         // ASSERT
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "Price");
-        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("100.000"));
+        Assert.Contains(result.Errors, e => e.ErrorMessage.Contains("100000"));
     }
 }
 

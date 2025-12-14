@@ -1,6 +1,7 @@
-using Application.Common.Models;
-using Application.Common.Interfaces;
+
 using Domain.Entities;
+using Application.Common.Interfaces;
+
 
 namespace Application.Features.Products.Repositories;
 

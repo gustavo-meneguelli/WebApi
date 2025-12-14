@@ -1,8 +1,9 @@
+using Application.Features.Auth.DTOs;
 using Domain.Entities;
 
 namespace Application.Common.Interfaces;
 
 public interface ITokenService
 {
-    public string GenerateToken(User user);
+    AuthResponseDto GenerateAuthResponse(User user);
 }

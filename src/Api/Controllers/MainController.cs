@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Enums;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
 
@@ -11,7 +12,7 @@ public abstract class MainController : ControllerBase
     // Traduz Result Pattern para códigos HTTP apropriados
     protected IActionResult ParseResult<T>(Result<T>? result)
     {
-        if (result is null) return BadRequest(new { message = "Operação inválida." });
+        if (result is null) return BadRequest(new { message = ErrorMessages.InvalidOperation });
 
         return result.TypeResult switch
         {
@@ -22,6 +23,7 @@ public abstract class MainController : ControllerBase
             TypeResult.NotFound => NotFound(new { message = result.Message }),
             TypeResult.Duplicated => Conflict(new { message = result.Message }),
             TypeResult.Unauthorized => Unauthorized(new { message = result.Message }),
+            TypeResult.Failure => BadRequest(new { message = result.Message }),
             TypeResult.NoContent => NoContent(),
 
             _ => BadRequest(new { message = result.Message })
@@ -41,7 +43,7 @@ public abstract class MainController : ControllerBase
 
         return BadRequest(new
         {
-            Message = "Erros de validação foram encontrados.",
+            Message = "Validation errors were found.",
             Errors = errors
         });
     }

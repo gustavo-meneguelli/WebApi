@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Services;
+using Domain.Constants;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +66,7 @@ public class ProductsController(
     /// <response code="409">Já existe um produto com este nome.</response>
     /// <response code="401">Não autenticado.</response>
     /// <response code="403">Não autorizado (apenas Admins).</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -102,7 +103,7 @@ public class ProductsController(
     /// <response code="403">Acesso negado (apenas Admins).</response>
     /// <response code="404">Nenhum produto encontrado com este ID.</response>
     /// <response code="409">Já existe outro produto com este nome.</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpPatch("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -133,7 +134,7 @@ public class ProductsController(
     /// <response code="401">Usuário não autenticado.</response>
     /// <response code="403">Acesso negado (apenas Admins).</response>
     /// <response code="404">Nenhum produto encontrado com este ID.</response>
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

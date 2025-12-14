@@ -9,19 +9,18 @@ public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
 {
     public CreateCategoryDtoValidator(ICategoryRepository categoryRepository)
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("O nome é obrigatório.")
-            .MinimumLength(3).WithMessage("O nome deve ter no mínimo 3 caracteres.")
-            .MaximumLength(50).WithMessage("O nome deve ter no máximo 50 caracteres.");
-
+        // Validação de Name: sync primeiro, async só se passar nas básicas
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage(string.Format(ErrorMessages.RequiredField, "name"))
+            .MinimumLength(3).WithMessage(string.Format(ErrorMessages.MinLength, "name", 3))
+            .MaximumLength(50).WithMessage(string.Format(ErrorMessages.MaxLength, "name", 50))
             .MustAsync(async (name, _) =>
             {
                 bool exists = await categoryRepository.ExistsByNameAsync(name);
                 return !exists;
             })
-            .WithMessage(string.Format(ErrorMessages.AlreadyExists, "Categoria", "nome"));
+            .WithMessage(string.Format(ErrorMessages.AlreadyExists, "category", "name"));
     }
 }
 

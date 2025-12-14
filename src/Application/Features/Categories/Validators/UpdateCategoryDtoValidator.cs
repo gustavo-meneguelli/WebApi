@@ -1,7 +1,5 @@
 using Application.Features.Categories.DTOs;
-using Application.Features.Products.Repositories;
 using Application.Features.Categories.Repositories;
-using Application.Features.Auth.Repositories;
 using Domain.Constants;
 using FluentValidation;
 
@@ -11,21 +9,17 @@ public class UpdateCategoryDtoValidator : AbstractValidator<UpdateCategoryDto>
 {
     public UpdateCategoryDtoValidator(ICategoryRepository categoryRepository)
     {
-        // Update parcial: valida nome APENAS se informado
-        RuleFor(c => c.Name)
-            .MinimumLength(3).WithMessage("O nome deve ter no mínimo 3 caracteres.")
-            .MaximumLength(50).WithMessage("O nome deve ter no máximo 50 caracteres.")
-            .When(c => c.Name != string.Empty);
-
-        // Verifica unicidade apenas se nome informado
+        // Validação de Name: update parcial, só valida se informado
         RuleFor(c => c.Name)
             .Cascade(CascadeMode.Stop)
+            .MinimumLength(3).WithMessage(string.Format(ErrorMessages.MinLength, "name", 3))
+            .MaximumLength(50).WithMessage(string.Format(ErrorMessages.MaxLength, "name", 50))
             .MustAsync(async (name, _) =>
             {
                 bool exists = await categoryRepository.ExistsByNameAsync(name);
                 return !exists;
             })
-            .WithMessage(string.Format(ErrorMessages.AlreadyExists, "categoria", "nome"))
+            .WithMessage(string.Format(ErrorMessages.AlreadyExists, "category", "name"))
             .When(c => c.Name != string.Empty);
     }
 }

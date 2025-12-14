@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Repositories;
+using Application.Features.ProductReviews.Repositories;
 using Application.Common.Interfaces;
 using AutoMapper;
 using Domain.Constants;
@@ -11,6 +12,7 @@ namespace Application.Features.Products.Services;
 
 public class ProductService(
     IProductRepository productRepository,
+    IProductReviewRepository productReviewRepository,
     IMapper mapper,
     IUnitOfWork unitOfWork) : IProductService
 {
@@ -22,7 +24,26 @@ public class ProductService(
             filter: null,
             include: query => query.Include(p => p.Category)!);
 
-        var products = mapper.Map<IEnumerable<ProductResponseDto>>(pagedEntities.Items);
+        var products = mapper.Map<IEnumerable<ProductResponseDto>>(pagedEntities.Items).ToList();
+
+        // Busca ratings de todos os produtos em UMA query (evita N+1)
+        var productIds = products.Select(p => p.Id).ToList();
+        var ratingSummaries = await productReviewRepository.GetRatingSummaryBatchAsync(productIds);
+
+        // Associa ratings aos produtos usando o dicionário
+        foreach (var product in products)
+        {
+            if (ratingSummaries.TryGetValue(product.Id, out var summary))
+            {
+                product.AverageRating = summary.AverageRating;
+                product.TotalReviews = summary.TotalReviews;
+            }
+            else
+            {
+                product.AverageRating = 0;
+                product.TotalReviews = 0;
+            }
+        }
 
         var response = new PagedResult<ProductResponseDto>
         {
@@ -46,6 +67,11 @@ public class ProductService(
         }
 
         var response = mapper.Map<Product, ProductResponseDto>(product);
+
+        // Calcular média de avaliações
+        var (averageRating, totalReviews) = await productReviewRepository.GetProductRatingSummaryAsync(id);
+        response.AverageRating = averageRating;
+        response.TotalReviews = totalReviews;
 
         return Result<ProductResponseDto?>.Success(response);
 

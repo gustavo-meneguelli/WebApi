@@ -1,7 +1,7 @@
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Repositories;
 using Application.Features.Categories.Repositories;
-using Application.Common.Interfaces;
+
 using Application.Features.Products.Validators;
 using Domain.Entities;
 using FluentValidation.TestHelper;
@@ -34,7 +34,7 @@ public class CreateProductDtoValidatorTests
 
         // ASSERT
         result.ShouldHaveValidationErrorFor(product => product.Price)
-              .WithErrorMessage("O preço deve ser maior que zero.");
+              .WithErrorMessage("The price must be greater than zero.");
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class CreateProductDtoValidatorTests
 
         // ASSERT
         result.ShouldHaveValidationErrorFor(product => product.Name)
-              .WithErrorMessage("Já existe um registro de produto com este nome.");
+              .WithErrorMessage("A product with this name already exists.");
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class CreateProductDtoValidatorTests
 
         // ASSERT
         result.ShouldHaveValidationErrorFor(product => product.CategoryId)
-              .WithErrorMessage("Categoria não foi encontrado(a).");
+              .WithErrorMessage("Category not found.");
     }
 
     [Fact]
@@ -86,7 +86,14 @@ public class CreateProductDtoValidatorTests
             .Setup(repo => repo.GetByIdAsync(1))
             .ReturnsAsync(new Category { Id = 1, Name = "Tech" }); // Existe
 
-        var model = new CreateProductDto { Name = "Novo Produto", Price = 10, CategoryId = 1 };
+        var model = new CreateProductDto 
+        { 
+            Name = "Novo Produto", 
+            Description = "Descrição do produto com pelo menos 10 caracteres",
+            ImageUrl = "https://example.com/image.jpg",
+            Price = 10, 
+            CategoryId = 1 
+        };
 
         // ACT
         var result = await _validator.TestValidateAsync(model);

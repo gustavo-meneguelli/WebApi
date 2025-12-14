@@ -1,6 +1,5 @@
 using Application.Common.Models;
 using Application.Features.Products.DTOs;
-using Domain.Entities;
 
 namespace Application.Features.Products.Services;
 

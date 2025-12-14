@@ -24,6 +24,9 @@ public class Result<T>
     public static Result<T> Unauthorized(string message = "The operation was unauthorized.") => new Result<T>()
     { Message = message, TypeResult = TypeResult.Unauthorized };
 
+    public static Result<T> Failure(string message = "The operation has failed.") => new Result<T>()
+    { Message = message, TypeResult = TypeResult.Failure };
+
     public static Result<T> NoContent() => new Result<T>
     {
         TypeResult = TypeResult.NoContent

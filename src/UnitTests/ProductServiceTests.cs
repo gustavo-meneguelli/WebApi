@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Repositories;
+using Application.Features.ProductReviews.Repositories;
 using Application.Features.Products.Services;
 using AutoMapper;
 using Domain.Constants;
@@ -11,6 +12,16 @@ namespace UnitTests;
 
 public class ProductServiceTests
 {
+    private readonly Mock<IProductReviewRepository> _productReviewRepositoryMock = new();
+
+    public ProductServiceTests()
+    {
+        // Setup padrão: retorna (0, 0) para média de avaliações
+        _productReviewRepositoryMock
+            .Setup(r => r.GetProductRatingSummaryAsync(It.IsAny<int>()))
+            .ReturnsAsync((0.0, 0));
+    }
+
     [Fact]
     public async Task GetByIdAsync_ShouldReturnSuccess_WhenProductExists()
     {
@@ -28,6 +39,8 @@ public class ProductServiceTests
         {
             Id = 1,
             Name = "Teste",
+            Description = "Descrição do produto",
+            ImageUrl = "https://example.com/image.jpg",
             Price = 10,
             CategoryId = 1
         };
@@ -38,6 +51,7 @@ public class ProductServiceTests
 
         var service = new ProductService(
             productRepositoryMock.Object,
+            _productReviewRepositoryMock.Object,
             mapper,
             unitOfWorkMock.Object);
 
@@ -64,6 +78,7 @@ public class ProductServiceTests
 
         var service = new ProductService(
             productRepositoryMock.Object,
+            _productReviewRepositoryMock.Object,
             mapperMock.Object,
             unitOfWorkMock.Object);
 
@@ -91,7 +106,15 @@ public class ProductServiceTests
         var mapper = config.CreateMapper();
 
         // Produto original no banco
-        var originalProduct = new Product { Id = 1, Name = "Original", Price = 10, CategoryId = 1 };
+        var originalProduct = new Product 
+        { 
+            Id = 1, 
+            Name = "Original", 
+            Description = "Descrição original",
+            ImageUrl = "https://example.com/original.jpg",
+            Price = 10, 
+            CategoryId = 1 
+        };
 
         productRepositoryMock
             .Setup(repo => repo.GetByIdAsync(1))
@@ -104,6 +127,7 @@ public class ProductServiceTests
 
         var service = new ProductService(
             productRepositoryMock.Object,
+            _productReviewRepositoryMock.Object,
             mapper,
             unitOfWorkMock.Object);
 
@@ -138,12 +162,15 @@ public class ProductServiceTests
         var dto = new CreateProductDto()
         {
             Name = "Teste",
+            Description = "Descrição do produto de teste",
+            ImageUrl = "https://example.com/teste.jpg",
             Price = 10,
             CategoryId = 1
         };
 
         var service = new ProductService(
             productRepositoryMock.Object,
+            _productReviewRepositoryMock.Object,
             mapper,
             unitOfWorkMock.Object);
 
@@ -160,5 +187,6 @@ public class ProductServiceTests
         unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
     }
 }
+
 
 

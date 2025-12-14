@@ -8,5 +8,5 @@ public abstract class Entity
 
     public DateTime? UpdatedAt { get; set; }
 
-    public bool IsDeleted { get; set; }  // Soft Delete flag
+    public bool IsDeleted { get; set; }  // Flag de Soft Delete
 }

@@ -7,5 +7,6 @@ public enum TypeResult
     Duplicated,
     NotFound,
     Unauthorized,
-    NoContent
+    NoContent,
+    Failure
 }

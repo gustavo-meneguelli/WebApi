@@ -1,3 +1,5 @@
+using Domain.Constants;
+
 namespace Api.Middlewares;
 
 public class GlobalErrorHandlerMiddleware(
@@ -14,7 +16,7 @@ public class GlobalErrorHandlerMiddleware(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ocorreu um erro não tratado.");
+            logger.LogError(ex, ErrorMessages.UnhandledError);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -28,7 +30,7 @@ public class GlobalErrorHandlerMiddleware(
         var errorResponse = new
         {
             Status = context.Response.StatusCode,
-            Message = "Ocorreu um erro interno no servidor. Tente novamente mais tarde.",
+            Message = ErrorMessages.InternalServerError,
             Detailed = environment.IsDevelopment() ? exception.Message : null
         };
 
